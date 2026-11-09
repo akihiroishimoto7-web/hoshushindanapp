@@ -74,9 +74,6 @@ src/
 
 ## Vercel へのデプロイ
 
-このリポジトリのルートには別のアプリ（Next.js）があるため、Vercel では新しいプロジェクトとして登録し、次のように設定してください。
+リポジトリのルート（保守度診断アプリ）の `npm run build` が、`scripts/build-cheese.js` でこのゲームもビルドし、`public/cheese` に置きます。そのため、すでに GitHub と連携している Vercel プロジェクトに push するだけで、同じサイトの **`/cheese`** で遊べます（Vercel 側の設定変更は不要）。
 
-- Root Directory: `neko-cheese-kobo`
-- Framework Preset: Vite（`vercel.json` で指定済み）
-- Build Command: `npm run build` / Output Directory: `dist`（同上）
-- 環境変数: 不要
+ゲームだけを独立したサイトにしたい場合は、Vercel で Root Directory を `neko-cheese-kobo` にした別プロジェクトを作れば、同梱の `vercel.json` でそのまま動きます。

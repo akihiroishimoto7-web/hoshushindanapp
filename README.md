@@ -67,4 +67,4 @@ lib/
 
 ## 同梱プロジェクト: ねこのチーズ工房
 
-`neko-cheese-kobo/` に、牛乳からチーズができるまでを猫と一緒に体験する子ども向け 3D アドベンチャー（Vite + React Three Fiber）を同梱しています。このアプリとは独立しており、Vercel では Root Directory を `neko-cheese-kobo` にした別プロジェクトとしてデプロイします。詳しくは [neko-cheese-kobo/README.md](neko-cheese-kobo/README.md) を参照してください。
+`neko-cheese-kobo/` に、牛乳からチーズができるまでを猫と一緒に体験する子ども向け 3D アドベンチャー（Vite + React Three Fiber）を同梱しています。ルートの `npm run build` がゲームもビルドして `public/cheese` に置くため、このアプリと同じ Vercel プロジェクトの **`/cheese`** で遊べます。詳しくは [neko-cheese-kobo/README.md](neko-cheese-kobo/README.md) を参照してください。
