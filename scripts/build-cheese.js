@@ -9,7 +9,8 @@ const app = path.join(root, 'neko-cheese-kobo');
 const out = path.join(root, 'public', 'cheese');
 const run = (cmd) => execSync(cmd, { cwd: app, stdio: 'inherit' });
 
-run('npm ci --no-audit --no-fund');
+console.log('node', process.version);
+run('npm ci --no-audit --no-fund --include=dev');
 run('npm run build -- --base=/cheese/');
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(path.dirname(out), { recursive: true });
