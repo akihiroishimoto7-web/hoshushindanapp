@@ -249,6 +249,12 @@ export function Vat({ children, valveRef, onValve }: { children?: ReactNode; val
         <mesh material={steel} rotation-x={Math.PI / 2} position-z={0.25}>
           <cylinderGeometry args={[0.08, 0.08, 0.5, 10]} />
         </mesh>
+        {onValve && (
+          <mesh position={[0, 0.1, 0.4]}>
+            <sphereGeometry args={[0.42, 10, 8]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+        )}
         <mesh position={[0, 0.16, 0.38]}>
           <cylinderGeometry args={[0.05, 0.05, 0.2, 8]} />
           <meshStandardMaterial color="#e8604c" />

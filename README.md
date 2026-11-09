@@ -62,3 +62,9 @@ lib/
 ## 免責
 
 本診断はエンタメ目的です。実在の政治思想・宗教・個人を診断・評価するものではありません。
+
+---
+
+## 同梱プロジェクト: ねこのチーズ工房
+
+`neko-cheese-kobo/` に、牛乳からチーズができるまでを猫と一緒に体験する子ども向け 3D アドベンチャー（Vite + React Three Fiber）を同梱しています。このアプリとは独立しており、Vercel では Root Directory を `neko-cheese-kobo` にした別プロジェクトとしてデプロイします。詳しくは [neko-cheese-kobo/README.md](neko-cheese-kobo/README.md) を参照してください。

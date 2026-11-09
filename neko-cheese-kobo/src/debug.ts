@@ -1,7 +1,7 @@
 import { game, useGame } from './game/game';
 import { dialog, useDialog } from './game/dialog';
 import { useProgress } from './game/progress';
-import { listTargets, screenPosOf } from './three/targets';
+import { listTargets, screenPosOf, threeRef } from './three/targets';
 import { bus } from './game/bus';
 
 /** ?debug をつけて開くと、ブラウザのコンソール・自動テストから操作できる */
@@ -17,5 +17,6 @@ export function installDebug() {
     }),
     targets: listTargets,
     screenPos: screenPosOf,
+    perf: () => ({ ...threeRef, camera: undefined }),
   };
 }

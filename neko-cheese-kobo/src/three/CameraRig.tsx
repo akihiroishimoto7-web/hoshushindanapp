@@ -56,7 +56,7 @@ export function followShot(pos: THREE.Vector3, look: THREE.Vector3, speed = 3) {
 export function aspectInfo(aspect: number) {
   const H = THREE.MathUtils.degToRad(58);
   let vfov = 2 * Math.atan(Math.tan(H / 2) / aspect);
-  vfov = THREE.MathUtils.clamp(vfov, THREE.MathUtils.degToRad(40), THREE.MathUtils.degToRad(64));
+  vfov = THREE.MathUtils.clamp(vfov, THREE.MathUtils.degToRad(47), THREE.MathUtils.degToRad(64));
   const need = Math.tan(H / 2) / (Math.tan(vfov / 2) * aspect);
   const factor = Math.pow(Math.max(1, need), 0.72);
   return { vfov: THREE.MathUtils.radToDeg(vfov), factor, portrait: aspect < 0.95 };
@@ -105,6 +105,10 @@ export function CameraRig() {
     threeRef.camera = camera;
     threeRef.width = state.size.width;
     threeRef.height = state.size.height;
+    threeRef.calls = state.gl.info.render.calls;
+    threeRef.tris = state.gl.info.render.triangles;
+    threeRef.geos = state.gl.info.memory.geometries;
+    threeRef.texs = state.gl.info.memory.textures;
   });
 
   return null;

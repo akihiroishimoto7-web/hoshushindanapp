@@ -34,7 +34,15 @@ export function listTargets() {
 }
 
 /** テスト用: いまのカメラと画面サイズ */
-export const threeRef: { camera: THREE.Camera | null; width: number; height: number } = { camera: null, width: 1, height: 1 };
+export const threeRef: { camera: THREE.Camera | null; width: number; height: number; calls: number; tris: number; geos: number; texs: number } = {
+  camera: null,
+  width: 1,
+  height: 1,
+  calls: 0,
+  tris: 0,
+  geos: 0,
+  texs: 0,
+};
 
 /** 名前つきオブジェクトの 画面上の位置（px） */
 export function screenPosOf(name: string) {

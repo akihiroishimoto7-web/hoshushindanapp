@@ -47,20 +47,24 @@ export function CheeseWheel({
   const wedgeRef = useRef<THREE.Group>(null);
   const cutT = useRef(cut ? 1 : 0);
 
+  // テクスチャは 形と マークごとに 1つ。色は material.color で そめる（熟成で 色が かわっても 作りなおさない）
   const mats = useMemo(() => {
     const side = new THREE.MeshStandardMaterial({
-      color: rind,
       map: speckleTex('#ffffff', '#9a6a20', 'rind-speck', 600),
-      roughness: 0.55 + rough * 0.4,
+      roughness: 0.6,
     });
     const top = new THREE.MeshStandardMaterial({
-      map: cheeseTopTex(rind, mark, markColor, `top:${rind}:${mark}:${markColor}`),
-      roughness: 0.55 + rough * 0.4,
+      map: cheeseTopTex('#ffffff', mark, markColor, `top:${mark}:${markColor}`),
+      roughness: 0.6,
     });
+    const innerMap = inside === 'holes' ? holesTex() : inside === 'veins' ? veinsTex() : speckleTex('#ffffff', '#d9b45a', 'paste-speck', 160);
+    // 断面は かげに なりやすいので、すこし 自分で 光らせて 模様（あな・あおカビ）を 見やすく
     const inner = new THREE.MeshStandardMaterial({
-      color: inside === 'plain' || inside === 'creamy' ? paste : '#ffffff',
-      map: inside === 'holes' ? holesTex() : inside === 'veins' ? veinsTex() : speckleTex('#ffffff', '#d9b45a', 'paste-speck', 160),
-      roughness: inside === 'creamy' ? 0.35 : 0.7,
+      map: innerMap,
+      emissiveMap: innerMap,
+      emissive: '#ffffff',
+      emissiveIntensity: 0.32,
+      roughness: 0.7,
       side: THREE.DoubleSide,
     });
     const fuzz = new THREE.MeshStandardMaterial({
@@ -71,7 +75,7 @@ export function CheeseWheel({
       depthWrite: false,
     });
     return { side, top, inner, fuzz };
-  }, [rind, paste, inside, mark, markColor, rough]);
+  }, [inside, mark, markColor]);
 
   useEffect(
     () => () => {
@@ -85,7 +89,12 @@ export function CheeseWheel({
     mats.fuzz.visible = mold > 0.01;
     const c = new THREE.Color(rind).lerp(new THREE.Color('#f8f4e8'), Math.min(1, mold));
     mats.side.color.copy(c);
-  }, [mold, mats, rind]);
+    mats.top.color.copy(c);
+    mats.side.roughness = mats.top.roughness = 0.55 + rough * 0.4;
+    if (inside === 'plain' || inside === 'creamy') mats.inner.color.set(paste);
+    else mats.inner.color.set('#ffffff');
+    mats.inner.roughness = inside === 'creamy' ? 0.3 : 0.7;
+  }, [mold, mats, rind, paste, rough, inside]);
 
   const geos = useMemo(() => {
     const body = new THREE.CylinderGeometry(radius, radius, height, 48, 1, false, WEDGE / 2, Math.PI * 2 - WEDGE);
@@ -151,24 +160,18 @@ export function Mozzarella({ r = 0.35, cut = false, position, scale }: { r?: num
           <sphereGeometry args={[r, 32, 24]} />
         </mesh>
       )}
-      {cut && (
-        <>
-          <mesh material={mats.skin} scale={[1, 0.9, 1]} rotation-x={Math.PI / 2}>
-            <sphereGeometry args={[r, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          </mesh>
-          <mesh material={mats.inner} scale={[1, 0.9, 1]}>
-            <circleGeometry args={[r, 32]} />
-          </mesh>
-          <group position-z={r * 0.5}>
+      {cut &&
+        [-1, 1].map((side) => (
+          // ふたつに わって、 どちらも 断面（すじ）が こちらを むくように ならべる
+          <group key={side} position-x={side * r * 1.08} rotation-y={side * -0.3}>
             <mesh material={mats.skin} scale={[1, 0.9, 1]} rotation-x={-Math.PI / 2}>
               <sphereGeometry args={[r, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
             </mesh>
-            <mesh material={mats.inner} scale={[1, 0.9, 1]} rotation-y={Math.PI}>
+            <mesh material={mats.inner} scale={[1, 0.9, 1]}>
               <circleGeometry args={[r, 32]} />
             </mesh>
           </group>
-        </>
-      )}
+        ))}
     </group>
   );
 }
