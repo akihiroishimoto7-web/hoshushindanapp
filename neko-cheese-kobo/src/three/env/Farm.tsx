@@ -662,10 +662,10 @@ export function Butterflies({ center = [0, 0] as [number, number] }) {
 export function FarmLights() {
   return (
     <>
-      <hemisphereLight args={['#d6efff', '#7fbf5a', 1.25]} />
-      <directionalLight position={[10, 16, 8]} intensity={2.4} color="#fff1d6" />
-      <directionalLight position={[-8, 6, -10]} intensity={0.6} color="#bfe0ff" />
-      <fog attach="fog" args={['#e9f4ff', 38, 110]} />
+      <hemisphereLight args={['#dff1ff', '#8fc45e', 1.2]} />
+      <directionalLight position={[9, 11, -6]} intensity={2.7} color="#ffe6b8" />
+      <directionalLight position={[-8, 6, 10]} intensity={0.75} color="#cfe6ff" />
+      <fog attach="fog" args={['#fbeedb', 34, 105]} />
     </>
   );
 }

@@ -7,7 +7,7 @@ import type { Step } from './types';
  * 章シーンの共通処理: 最初の数フレームを描いたら「じゅんび完了」、
  * ローディングが消えてから 台本を はじめる。
  */
-export function useChapterStart(script: Step[], delay = 700) {
+export function useChapterStart(script: Step[], delay = 2500) {
   const frames = useRef(0);
   const started = useRef(false);
   useFrame(() => {

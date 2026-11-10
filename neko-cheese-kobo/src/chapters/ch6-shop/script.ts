@@ -62,6 +62,6 @@ export const script: Step[] = [
     event: 'cam:all',
   },
   { t: 'say', text: 'こんど チーズを たべるとき、 きょうの ぼうけんを おもいだしてニャ！', face: 'gentle', gesture: 'wave' },
-  { t: 'say', text: 'また いつでも あそびに きてね。 いっしょに チーズを つくろうニャ！', face: 'excited', gesture: 'jump', sfx: 'success' },
+  { t: 'say', text: 'きょうは きみと いっしょで、 ほんとうに たのしかった。 また いつでも あそびに きてね。 いっしょに チーズを つくろうニャ！', face: 'love', gesture: 'cheer', sfx: 'success' },
   { t: 'end' },
 ];

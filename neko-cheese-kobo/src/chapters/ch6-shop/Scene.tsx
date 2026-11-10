@@ -10,7 +10,7 @@ import { say } from '../../game/say';
 import { useProgress } from '../../game/progress';
 import { agedLook, agingMaxDays, DEFAULT_CHEESE, formatDays, MARK_COLOR, TYPE_NAME } from '../../game/cheese';
 import { setShot } from '../../three/CameraRig';
-import { BlobShadow, Motes, Tappable } from '../../three/common';
+import { BlobShadow, Motes, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -25,8 +25,10 @@ import { RubyText } from '../../ui/RubyText';
 const SLOT_X = [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0];
 const SHELF_Z = -1.0;
 const SHELF_Y = 0.98;
+// 横画面では ちかく、縦画面では たな全体が 入るように ひく
+const WIDE = typeof window !== 'undefined' && window.innerWidth > window.innerHeight;
 const OVERVIEW: [THREE.Vector3Tuple, THREE.Vector3Tuple] = [
-  [0, 3.3, 9.3],
+  WIDE ? [0, 2.7, 6.2] : [0, 3.3, 9.3],
   [0, 1.2, -0.8],
 ];
 // 図鑑の ならび（まんなかは きみの チーズ）
@@ -226,6 +228,7 @@ export default function ShopScene() {
         </mesh>
       </SecretSpot>
       <Motes count={40} area={[9, 3, 5]} center={[0, 2.6, 0]} color="#fff3c8" size={0.08} opacity={0.5} />
+      <RewardRays on={placed && !sel} position={[slotOf('mine'), SHELF_Y + 0.45, SHELF_Z - 0.4]} size={2.2} />
       {/* かご */}
       {!placed && (
         <group position={[1.6, 0, 2.2]} ref={basketRef}>

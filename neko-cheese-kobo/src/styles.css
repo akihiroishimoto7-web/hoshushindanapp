@@ -1142,3 +1142,66 @@ button {
   font-weight: 700;
   color: var(--brown);
 }
+
+/* ---------- 章の タイトルカード ---------- */
+.chapter-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none !important;
+  z-index: 3;
+  animation: cardFade 2.6s ease forwards;
+}
+.chapter-card .inner {
+  background: rgba(255, 253, 245, 0.96);
+  border: 6px solid var(--cheese);
+  border-radius: 36px;
+  padding: 18px 34px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  max-width: calc(100vw - 32px);
+  animation: cardPop 2.6s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+.chapter-card .em {
+  display: block;
+  font-size: clamp(44px, 14vw, 72px);
+  line-height: 1.1;
+  animation: bounce 0.9s ease-in-out infinite;
+}
+.chapter-card small {
+  display: block;
+  font-weight: 900;
+  color: var(--brown-2);
+  font-size: clamp(15px, 4vw, 20px);
+}
+.chapter-card b {
+  font-size: clamp(22px, 6.4vw, 34px);
+  font-weight: 900;
+}
+@keyframes cardFade {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes cardPop {
+  0% {
+    transform: scale(0.5) rotate(-6deg);
+    opacity: 0;
+  }
+  14% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15) translateY(-30px);
+  }
+}

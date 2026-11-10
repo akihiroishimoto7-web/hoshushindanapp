@@ -7,7 +7,7 @@ import { useBus } from '../../game/bus';
 import { dialog, catGesture } from '../../game/dialog';
 import { say } from '../../game/say';
 import { setShot } from '../../three/CameraRig';
-import { Tappable } from '../../three/common';
+import { RewardRays, Tappable } from '../../three/common';
 import { CowFace, Mouse, WindowPeek } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -44,6 +44,7 @@ export default function CurdScene() {
   const [ff, setFf] = useState<string | null>(null);
   const [bubble, setBubble] = useState(false);
   const [saltUp, setSaltUp] = useState(false);
+  const [rays, setRays] = useState(false);
   const hair = useRef(1);
   const join = useRef(0);
   const jiggles = useRef(0);
@@ -101,6 +102,9 @@ export default function CurdScene() {
   });
   useBus('setCurd', () => {
     curd.current = 0.001;
+    setRays(true);
+    setTimeout(() => setRays(false), 4500);
+    fx.burst([0, VAT.top + 0.2, 0], { star: true, count: 34, color: ['#fff3c4', '#ffffff', '#ffd34d'], speed: 3, gravity: 0.6, life: 1.5, size: 0.4 });
     ripples.current.push({ x: 0, z: 0, t0: clock.current, amp: 0.12 });
     setTimeout(() => setBubble(false), 600);
   });
@@ -112,7 +116,13 @@ export default function CurdScene() {
   useFrame((st, dt0) => {
     const dt = Math.min(dt0, 0.05);
     clock.current = st.clock.elapsedTime;
-    if (pouring) level.current = Math.min(0.78, level.current + dt * 0.45);
+    if (pouring) {
+      level.current = Math.min(0.78, level.current + dt * 0.45);
+      const sy = VAT.bottom + 0.05 + level.current * (VAT.top - VAT.bottom - 0.2);
+      if (Math.random() < dt * 30) fx.burst([-0.2, sy, 0.95], { count: 2, color: ['#ffffff', '#fffbe8'], speed: 1.3, gravity: 5, life: 0.5, size: 0.16, spread: 0.8 });
+      if (Math.random() < dt * 5) ripples.current.push({ x: -0.2, z: 0.95, t0: st.clock.elapsedTime, amp: 0.03 });
+      if (ripples.current.length > 6) ripples.current.shift();
+    }
     if (curd.current > 0 && curd.current < 1) curd.current = Math.min(1, curd.current + dt * 0.8);
     if (cutting.current) hair.current = Math.max(0, hair.current - dt * 0.35);
     if (join.current > 0 && join.current < 1) join.current = Math.min(1, join.current + dt * 0.45);
@@ -235,9 +245,10 @@ export default function CurdScene() {
       )}
 
       <Mouse id="mouse3" position={[0.75, 0, 1.75]} rotationY={0.3} />
-      <WindowPeek id="windowCow" position={[3, 2.45, -4.7]}>
+      <WindowPeek id="windowCow" position={[-3, 2.45, -4.7]}>
         <CowFace />
       </WindowPeek>
+      <RewardRays on={rays} position={[0, VAT.top + 0.5, -1.8]} size={4} />
       {bubble && <MicelleBubble hair={hair} join={join} />}
 
       <MilkCat

@@ -8,6 +8,7 @@ import { fx } from '../fx';
 import { findSecret, SECRETS } from '../../game/secrets';
 import { dialog } from '../../game/dialog';
 import { playSfx } from '../../audio/sfx';
+import { useTarget } from '../targets';
 
 /** ひみつを みつけた ときの きょうつう しょり */
 export function discover(id: string, at?: THREE.Vector3 | THREE.Vector3Tuple) {
@@ -51,8 +52,9 @@ export function Mouse({ id, position, rotationY = 0, scale = 1 }: { id: string; 
     g.current.rotation.z = Math.sin(t * 3 + position[0]) * 0.05;
     g.current.rotation.x = Math.sin(t * 1.3) * 0.06;
   });
+  const reg = useTarget('secret-' + id);
   return (
-    <group position={position} rotation-y={rotationY} scale={scale}>
+    <group ref={reg} position={position} rotation-y={rotationY} scale={scale}>
       <Tappable
         hit={0.42}
         hitOffset={[0, 0.18, 0]}
@@ -72,8 +74,9 @@ export function Mouse({ id, position, rotationY = 0, scale = 1 }: { id: string; 
 
 /** タッチすると ひみつが みつかる もの */
 export function SecretSpot({ id, position, children, hit = 0.5, rotationY = 0 }: { id: string; position: THREE.Vector3Tuple; children?: ReactNode; hit?: number; rotationY?: number }) {
+  const reg = useTarget('secret-' + id);
   return (
-    <group position={position} rotation-y={rotationY}>
+    <group ref={reg} position={position} rotation-y={rotationY}>
       <Tappable
         hit={hit}
         onTap={(e) => {
@@ -99,8 +102,9 @@ export function WindowPeek({ id, position, children, rise = 0.9 }: { id: string;
       g.current.visible = up.current > 0.03;
     }
   });
+  const reg = useTarget('secret-' + id);
   return (
-    <group position={position}>
+    <group ref={reg} position={position}>
       <Tappable
         hit={1.0}
         sparkle={false}

@@ -10,7 +10,7 @@ import type { Step } from '../../game/types';
 export const script: Step[] = [
   { t: 'say', text: 'ここが チーズを つくる へや。 この おおきな なべで、 ぎゅうにゅうを チーズに するんだニャ！', face: 'proud', gesture: 'point', event: 'cam:vat' },
   { t: 'task', id: 'pour', hint: 'ミルクかんを タッチして、 ぎゅうにゅうを なべに いれよう', target: 'can' },
-  { t: 'say', text: 'たっぷり はいったね！', face: 'happy', gesture: 'clap' },
+  { t: 'say', text: 'たっぷり はいったね！ ぼくが すっぽり はいれそうな おおきさ だニャ。 ……はいらないけどね！', face: 'happy', gesture: 'clap' },
   {
     t: 'say',
     text: 'この ぎゅうにゅうは、 さきに ねつで わるい きんを やっつけて（さっきん して）あるよ。 だから あんしん。',
@@ -116,7 +116,7 @@ export const script: Step[] = [
   { t: 'task', id: 'jiggle', hint: 'ぷるぷるの カードを 3かい タッチしよう', target: 'curd' },
   {
     t: 'say',
-    text: 'ぷるんぷるん！ チーズしょくにんは、 ナイフを いれて きれいに われるかどうかで、 かたまりぐあいを たしかめるんだ。',
+    text: 'ぷるんぷるん！ ……ひとくち たべたく なっちゃうけど、 がまん がまん。 チーズしょくにんは、 ナイフを いれて きれいに われるかどうかで、 かたまりぐあいを たしかめるんだ。',
     face: 'excited',
     event: 'cam:vat',
   },

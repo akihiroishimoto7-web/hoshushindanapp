@@ -9,7 +9,7 @@ import { say } from '../../game/say';
 import { useProgress } from '../../game/progress';
 import { agedLook, agingMaxDays, cheeseLook, DEFAULT_CHEESE, formatDays, MARK_COLOR } from '../../game/cheese';
 import { setShot } from '../../three/CameraRig';
-import { BlobShadow, Glow, Tappable } from '../../three/common';
+import { BlobShadow, Glow, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -219,6 +219,7 @@ export default function AgingScene() {
         }}
       />
       <Dust />
+      <RewardRays on={v >= 0.999} position={[TABLE[0], 1.4, TABLE[2] - 0.6]} size={3.6} color="#ffe2a0" />
       <Mouse id="mouse5" position={[-0.75, 0, -11.15]} rotationY={0.4} />
       <SecretSpot id="oldCheese" position={[2.9, 0, -14.6]} hit={0.9}>
         <CheeseWheel radius={0.85} height={0.5} rind="#a8672a" paste="#e9b24a" rough={1} position={[0, 0.25, 0]} />

@@ -42,7 +42,7 @@ export const script: Step[] = [
   { t: 'task', id: 'stir', hint: 'なべの なかを ゆびで ぐるぐる かきまぜよう', target: 'curd' },
   {
     t: 'say',
-    text: 'じょうず！ チーズに よっては、 ここで すこし あたためながら まぜて、 もっと カードを ひきしめる ことも あるよ。',
+    text: 'め、 めが まわるニャ〜……。 でも じょうず！ チーズに よっては、 ここで すこし あたためながら まぜて、 もっと カードを ひきしめる ことも あるよ。',
     face: 'excited',
     gesture: 'clap',
     event: 'cam:vat',
@@ -121,7 +121,7 @@ export const script: Step[] = [
     text: 'でもね、 ほんものの チーズは、 しゅるいごとに つくりかたが ちゃんと きまっているんだ。 カードの おおきさ、 おんど、 おすか どうか…… ぜんぶ ちがうんだよ。',
     face: 'gentle',
   },
-  { t: 'say', text: 'きょうの チーズは、 きみの オリジナル！', face: 'proud', gesture: 'clap' },
+  { t: 'say', text: 'きょうの チーズは、 せかいに ひとつだけの、 きみの オリジナル！', face: 'love', gesture: 'cheer' },
   {
     t: 'choice',
     key: 'mark',

@@ -1,7 +1,7 @@
 import { useFrame, type ThreeElements, type ThreeEvent } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { radialTex, SKY } from './tex';
+import { radialTex, raysTex, SKY } from './tex';
 import { targetWorldPos } from './targets';
 import { useDialog } from '../game/dialog';
 import { fx } from './fx';
@@ -299,4 +299,37 @@ export const ease = {
 /** 0 → 1 へ なめらかに近づける値 */
 export function damp(cur: number, target: number, speed: number, dt: number) {
   return THREE.MathUtils.lerp(cur, target, 1 - Math.exp(-speed * dt));
+}
+
+/** できあがりの 瞬間に うしろで まわる 光の すじ（ごほうび演出） */
+export function RewardRays({ on, position, size = 3, color = '#fff0b0' }: { on: boolean; position?: THREE.Vector3Tuple; size?: number; color?: string }) {
+  const mats = useMemo(
+    () =>
+      [0, 1].map(
+        () => new THREE.SpriteMaterial({ map: raysTex(), color, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }),
+      ),
+    [color],
+  );
+  const a = useRef<THREE.Sprite>(null);
+  const b = useRef<THREE.Sprite>(null);
+  const k = useRef(0);
+  useFrame((st, dt) => {
+    k.current = THREE.MathUtils.lerp(k.current, on ? 1 : 0, 1 - Math.exp(-(on ? 4 : 2) * dt));
+    const t = st.clock.elapsedTime;
+    mats[0].rotation = t * 0.35;
+    mats[1].rotation = -t * 0.22;
+    mats[0].opacity = k.current * 0.3;
+    mats[1].opacity = k.current * 0.18;
+    const s = size * (0.4 + 0.6 * k.current) * (1 + Math.sin(t * 3) * 0.04);
+    a.current?.scale.setScalar(s);
+    b.current?.scale.setScalar(s * 1.35);
+    if (a.current) a.current.visible = k.current > 0.01;
+    if (b.current) b.current.visible = k.current > 0.01;
+  });
+  return (
+    <group position={position}>
+      <sprite ref={a} material={mats[0]} renderOrder={2} />
+      <sprite ref={b} material={mats[1]} renderOrder={2} />
+    </group>
+  );
 }

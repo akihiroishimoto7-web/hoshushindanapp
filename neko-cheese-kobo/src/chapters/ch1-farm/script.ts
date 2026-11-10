@@ -38,6 +38,7 @@ export const script: Step[] = [
   { t: 'say', text: 'まずは ぼくじょうの うしさんに あいに いこう！ じめんを タップすると、 そこまで あるけるよ。', face: 'happy', event: 'cam:follow' },
   { t: 'task', id: 'touchCow', hint: 'しろと くろの うしさんに タッチしてみよう', target: 'cow1' },
   { t: 'say', text: 'モ〜って いったね！ この うしさんは ホルスタイン。 しろと くろの もようが めじるし だニャ。', face: 'happy', event: 'cam:cow' },
+  { t: 'say', text: '「こんにちは」って いったのかも。 ぼく、 うしの ことばは ちょっとだけ わかるんだ。 ……たぶんニャ。', face: 'wink', gesture: 'shy' },
   { t: 'say', text: 'うしさんは、 あかちゃんを うむと、 おちちが でるように なるんだ。 ほら、 となりに こうしが いるでしょ？', face: 'gentle', gesture: 'point', event: 'cam:calf' },
   { t: 'say', text: 'おちちは ほんとうは あかちゃんの ための ごはん。 ぼくたちは それを すこし わけて もらっているんだニャ。', face: 'gentle' },
   {
@@ -86,7 +87,7 @@ export const script: Step[] = [
   { t: 'say', text: 'あ、 この かずは だいたい だよ。 うしさんや きせつで すこし かわるんだ。', face: 'gentle', event: 'hideLegend' },
   { t: 'say', text: 'あっ、 たいへん！ もう こんな じかん！ この ミルクかんを こうぼうに はこばなきゃ！', face: 'oops', gesture: 'jump', event: 'cam:follow' },
   { t: 'task', id: 'pickCan', hint: 'ミルクかんを タッチして もとう', target: 'can' },
-  { t: 'say', text: 'ありがとう！ ちからもち だニャ！ こうぼうは あの オレンジの やねの いえだよ。', face: 'happy', gesture: 'point' },
+  { t: 'say', text: 'ありがとう！ ちからもち だニャ！ ぼくが もつと、 いつも しっぽで バランスを とるのが たいへんなんだ。 こうぼうは あの オレンジの やねの いえだよ。', face: 'happy', gesture: 'point' },
   { t: 'task', id: 'deliver', hint: 'チーズこうぼうの とびらまで はこぼう', target: 'door' },
   { t: 'say', text: 'とうちゃく！ おつかれさま！', face: 'excited', gesture: 'jump', sfx: 'success', event: 'cam:door' },
   {

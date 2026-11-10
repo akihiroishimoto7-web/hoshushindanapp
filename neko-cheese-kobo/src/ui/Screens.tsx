@@ -345,3 +345,22 @@ function SecretCount({ chapter }: { chapter: number }) {
     </p>
   );
 }
+
+/** 章の はじまりに でる タイトルカード */
+export function ChapterCard() {
+  const ready = useGame((s) => s.sceneReady);
+  const screen = useGame((s) => s.screen);
+  const chapter = useGame((s) => s.chapter);
+  const runId = useGame((s) => s.runId);
+  if (!ready || screen !== 'play') return null;
+  const m = CHAPTERS[chapter];
+  return (
+    <div className="chapter-card" key={runId} aria-hidden>
+      <div className="inner" style={{ borderColor: m.color }}>
+        <span className="em">{m.stamp}</span>
+        <small>{m.label}</small>
+        <b>{m.title}</b>
+      </div>
+    </div>
+  );
+}

@@ -5,7 +5,7 @@ import { SCENES } from './chapters';
 import { TitleScene } from './chapters/TitleScene';
 import { DialogBox, HintBar } from './ui/DialogBox';
 import { Hud } from './ui/Hud';
-import { ChapterClear, Ending, Flash, Loading, TitleScreen } from './ui/Screens';
+import { ChapterCard, ChapterClear, Ending, Flash, Loading, TitleScreen } from './ui/Screens';
 import { ui } from './ui/tunnel';
 import { bus } from './game/bus';
 import { playSfx, type SfxName } from './audio/sfx';
@@ -61,6 +61,7 @@ export function App() {
             <Hud />
           </>
         )}
+        <ChapterCard />
         <ToastView />
         {screen === 'clear' && <ChapterClear />}
         {screen === 'ending' && <Ending />}

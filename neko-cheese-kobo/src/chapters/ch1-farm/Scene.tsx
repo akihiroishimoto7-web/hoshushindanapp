@@ -275,7 +275,7 @@ export default function FarmScene() {
       <Clouds />
       <DistantHills />
       <Motes count={70} area={[26, 4, 22]} center={[0, 2.2, 1]} color="#fff8c8" size={0.1} />
-      <Mouse id="mouse1" position={[-6.7, 0, -3.7]} rotationY={0.9} scale={1.35} />
+      <Mouse id="mouse1" position={[-0.55, 0, 3.75]} rotationY={0.5} scale={1.2} />
       <SecretSpot id="clover" position={[2.3, 0, 4.4]} hit={0.45}>
         <Clover />
       </SecretSpot>

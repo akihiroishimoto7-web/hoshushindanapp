@@ -532,3 +532,37 @@ export const SKY = {
   mid: new THREE.Color('#bfe5ff'),
   bottom: new THREE.Color('#fff1d6'),
 };
+
+/** ごほうびの 光の すじ（放射状） */
+export function raysTex() {
+  return make(
+    'rays',
+    256,
+    256,
+    (g, w, h) => {
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = rng(5);
+      for (let i = 0; i < 18; i++) {
+        const a = (i / 18) * Math.PI * 2 + r() * 0.1;
+        const wd = 0.05 + r() * 0.07;
+        const len = w * (0.34 + r() * 0.16);
+        const grd = g.createRadialGradient(cx, cy, 6, cx, cy, len);
+        grd.addColorStop(0, 'rgba(255,255,255,0.9)');
+        grd.addColorStop(1, 'rgba(255,255,255,0)');
+        g.fillStyle = grd;
+        g.beginPath();
+        g.moveTo(cx, cy);
+        g.arc(cx, cy, len, a - wd, a + wd);
+        g.closePath();
+        g.fill();
+      }
+      const core = g.createRadialGradient(cx, cy, 0, cx, cy, w * 0.22);
+      core.addColorStop(0, 'rgba(255,255,255,0.9)');
+      core.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = core;
+      g.fillRect(0, 0, w, h);
+    },
+    { srgb: false },
+  );
+}

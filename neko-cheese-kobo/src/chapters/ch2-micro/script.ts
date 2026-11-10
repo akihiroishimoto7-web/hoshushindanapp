@@ -16,6 +16,7 @@ export const script: Step[] = [
   },
   { t: 'task', id: 'useLoupe', hint: 'むしめがねを タッチしてみよう', target: 'loupe' },
   { t: 'say', text: 'うわぁ……！ まっしろで、 ふわふわの せかい！', face: 'surprised', gesture: 'spin' },
+  { t: 'say', text: 'ぼくの しっぽ、 ちゃんと ついてきてる？ ……よかったニャ。 ちいさく なっても ぼくは ぼく！', face: 'love', gesture: 'purr' },
   {
     t: 'say',
     text: 'ぎゅうにゅうが しろく みえるのはね、 なかに ある ちいさな つぶつぶに ひかりが あたって、 いろんな ほうこうに はねかえるから なんだ。',

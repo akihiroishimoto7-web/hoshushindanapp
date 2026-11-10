@@ -10,7 +10,7 @@ import { useProgress } from '../../game/progress';
 import { cheeseLook, curdSizeFromCuts, decideType, MARK_COLOR } from '../../game/cheese';
 import type { CheeseMark, CheeseResult, CheeseType } from '../../game/types';
 import { setShot } from '../../three/CameraRig';
-import { Tappable } from '../../three/common';
+import { RewardRays, Tappable } from '../../three/common';
 import { BirdBody, Mouse, WindowPeek } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -138,9 +138,12 @@ export default function MakerScene() {
     const type = decideType(counts.size, Boolean(pressed.current), press.current.power);
     dialog.setVar('pressType', type);
     setCheese({ type, mark: null });
+    setPressUI(false);
     lift.current = 0.001;
     setTimeout(() => {
       setRevealed(true);
+      catGesture('cheer');
+      setShot([1.0, 2.5, 5.0], [1.5, 1.15, 2.2], { fit: 0.6, speed: 1.5 });
       fx.burst([MOLD_T[0], MOLD_Y + 0.6, MOLD_T[2]], { star: true, count: 26, color: ['#ffd34d', '#ffffff', '#ff8fa3'], speed: 2.5, gravity: 0.8, life: 1.3, size: 0.4 });
     }, 700);
   });
@@ -502,6 +505,7 @@ export default function MakerScene() {
             </Tappable>
           </group>
           {(pressUI || pressed.current) && !revealed && <PressRig plateRef={plate} />}
+          <RewardRays on={revealed} position={[0, 0.45, -0.9]} size={2.6} />
           {revealed && cheese && look && (
             <CheeseWheel
               radius={look.radius}
