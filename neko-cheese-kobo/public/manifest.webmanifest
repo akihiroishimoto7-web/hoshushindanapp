@@ -1,0 +1,14 @@
+{
+  "name": "ねこのチーズ工房 〜ミルクから生まれる魔法〜",
+  "short_name": "チーズ工房",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff6dc",
+  "theme_color": "#ffd34d",
+  "lang": "ja",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
