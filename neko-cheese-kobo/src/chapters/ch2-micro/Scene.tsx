@@ -205,10 +205,6 @@ function Micro({ acid, setAcid }: { acid: number; setAcid: (n: number) => void }
     const left = Math.max(0, FEEDS - feeds.current);
     setAcid(Math.min(1, feeds.current / FEEDS));
     dialog.setProgress(left > 0 ? `あと ${left}` : undefined);
-    if (!said.current.eat) {
-      said.current.eat = true;
-      setTimeout(() => dialog.side(say(micro.firstEat, 'excited')), 500);
-    }
     if (lab.meals >= 2 && labs.length < 12) {
       lab.meals = 0;
       // ぶんれつ！

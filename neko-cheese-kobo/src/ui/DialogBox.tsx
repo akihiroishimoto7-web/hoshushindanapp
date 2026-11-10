@@ -7,7 +7,7 @@ import { playSfx } from '../audio/sfx';
 import { RubyText } from './RubyText';
 import { PawIcon } from './Icons';
 
-const CHAR_MS = 42;
+const CHAR_MS = 26;
 
 /**
  * 会話ウィンドウ。文字が 1つずつ出て、ねこが しゃべる（読み上げ）。

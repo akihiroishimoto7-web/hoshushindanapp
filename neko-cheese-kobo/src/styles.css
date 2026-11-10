@@ -1151,7 +1151,7 @@ button {
   place-items: center;
   pointer-events: none !important;
   z-index: 3;
-  animation: cardFade 2.6s ease forwards;
+  animation: cardFade 1.9s ease forwards;
 }
 .chapter-card .inner {
   background: rgba(255, 253, 245, 0.96);
@@ -1161,7 +1161,7 @@ button {
   text-align: center;
   box-shadow: var(--shadow);
   max-width: calc(100vw - 32px);
-  animation: cardPop 2.6s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  animation: cardPop 1.9s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
 }
 .chapter-card .em {
   display: block;

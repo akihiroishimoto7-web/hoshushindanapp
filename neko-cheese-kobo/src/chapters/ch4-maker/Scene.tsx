@@ -233,11 +233,7 @@ export default function MakerScene() {
       const next = [...prev, { axis, c }];
       const nx = next.filter((k) => k.axis === 'x').length;
       const info = curdSizeFromCuts(nx, next.length - nx, R);
-      const before = curdSizeFromCuts(prev.filter((k) => k.axis === 'x').length, prev.filter((k) => k.axis === 'z').length, R);
       dialog.setVar('curdSize', info.size);
-      if (next.length === 1) setTimeout(() => dialog.side(say('スパッ！ きった ところから、 みずが しみでて きたよ。 これが ホエイ。', 'surprised')), 300);
-      else if (info.size === 'small' && before.size !== 'small')
-        setTimeout(() => dialog.side(say('こまかく きるほど ホエイが たくさん でて、 かたい チーズに なるんだ。', 'excited')), 300);
       return next;
     });
     playSfx('cut');
