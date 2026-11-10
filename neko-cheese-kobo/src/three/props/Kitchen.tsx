@@ -76,4 +76,4 @@ export const glassMat = new THREE.MeshStandardMaterial({
   depthWrite: false,
   side: THREE.DoubleSide,
 });
-export const milkMat = new THREE.MeshStandardMaterial({ color: '#fffdf6', roughness: 0.25, emissive: '#fff8e6', emissiveIntensity: 0.15 });
+export const milkMat = new THREE.MeshPhysicalMaterial({ color: '#fffdf6', roughness: 0.22, emissive: '#fff8e6', emissiveIntensity: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 });

@@ -147,7 +147,7 @@ export function CheeseWheel({
 export function Mozzarella({ r = 0.35, cut = false, position, scale }: { r?: number; cut?: boolean; position?: THREE.Vector3Tuple; scale?: number }) {
   const mats = useMemo(
     () => ({
-      skin: new THREE.MeshStandardMaterial({ color: '#fffdf7', roughness: 0.18, metalness: 0 }),
+      skin: new THREE.MeshPhysicalMaterial({ color: '#fffdf7', roughness: 0.2, clearcoat: 0.9, clearcoatRoughness: 0.12 }),
       inner: new THREE.MeshStandardMaterial({ map: fiberTex(), roughness: 0.4, side: THREE.DoubleSide }),
     }),
     [],

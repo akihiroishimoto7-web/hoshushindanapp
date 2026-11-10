@@ -4,6 +4,7 @@ import { useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { plasterTex, woodTex } from '../tex';
 import { BlobShadow, Glow, Motes } from '../common';
+import { SunShadow } from '../realism';
 import { CheeseWheel } from '../props/Cheese';
 
 /**
@@ -13,9 +14,9 @@ import { CheeseWheel } from '../props/Cheese';
 export function WorkshopLights() {
   return (
     <>
-      <hemisphereLight args={['#fff4e0', '#b88a5a', 1.1]} />
-      <directionalLight position={[-4, 7, 5]} intensity={1.9} color="#fff0d0" />
-      <pointLight position={[0, 4.2, 1]} intensity={14} distance={12} decay={2} color="#ffd9a0" />
+      <hemisphereLight args={['#fff4e0', '#b88a5a', 0.6]} />
+      <SunShadow position={[-5, 9, 6]} intensity={2.9} color="#ffeccc" range={8} />
+      <pointLight position={[0, 4.2, 1]} intensity={5} distance={12} decay={2} color="#ffd9a0" />
       {/* 金属の映りこみ用（最初の1回だけ描く軽い環境マップ） */}
       <Environment resolution={64} frames={1}>
         <Lightformer form="rect" intensity={2.5} color="#fff3dc" position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />

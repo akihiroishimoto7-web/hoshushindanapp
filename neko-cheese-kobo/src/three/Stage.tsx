@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { CameraRig } from './CameraRig';
 import { Particles } from './fx';
 import { TaskMarker } from './common';
+import { Realism, setShadows } from './realism';
 
 /**
  * 3D の舞台。スマホの発熱を おさえるため、
@@ -16,6 +17,7 @@ export function Stage({ children, onLost }: { children: ReactNode; onLost?: () =
   return (
     <Canvas
       className="stage"
+      shadows
       dpr={dpr}
       gl={{ antialias: true, alpha: false, stencil: false, powerPreference: 'default' }}
       camera={{ fov: 45, near: 0.1, far: 320, position: [0, 5, 10], manual: true }}
@@ -33,9 +35,13 @@ export function Stage({ children, onLost }: { children: ReactNode; onLost?: () =
         onDecline={() => setDpr((d) => Math.max(1, d - 0.25))}
         onIncline={() => setDpr((d) => Math.min(maxDpr, d + 0.25))}
         flipflops={4}
-        onFallback={() => setDpr(1)}
+        onFallback={() => {
+          setDpr(1);
+          setShadows(false);
+        }}
       />
       <CameraRig />
+      <Realism />
       <Particles />
       <TaskMarker />
       {children}

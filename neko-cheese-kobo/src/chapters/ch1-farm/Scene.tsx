@@ -270,7 +270,7 @@ export default function FarmScene() {
 
   return (
     <>
-      <FarmLights />
+      <FarmLights follow={girl} />
       <SkyDome />
       <Clouds />
       <DistantHills />

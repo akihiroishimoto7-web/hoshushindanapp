@@ -1,6 +1,8 @@
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { Environment, Lightformer } from '@react-three/drei';
+import { SunShadow } from '../realism';
 import { rng, textTex, woodTex } from '../tex';
 import { BlobShadow } from '../common';
 
@@ -659,12 +661,17 @@ export function Butterflies({ center = [0, 0] as [number, number] }) {
 }
 
 /** 牧場の光 */
-export function FarmLights() {
+export function FarmLights({ follow }: { follow?: React.RefObject<THREE.Object3D | null> } = {}) {
   return (
     <>
-      <hemisphereLight args={['#dff1ff', '#8fc45e', 1.2]} />
-      <directionalLight position={[9, 11, -6]} intensity={2.7} color="#ffe6b8" />
-      <directionalLight position={[-8, 6, 10]} intensity={0.75} color="#cfe6ff" />
+      <hemisphereLight args={['#dff1ff', '#8fc45e', 0.85]} />
+      <SunShadow position={[9, 14, -5]} intensity={2.9} color="#ffe6b8" range={15} follow={follow} />
+      <Environment resolution={64} frames={1}>
+        <Lightformer form="rect" intensity={2.2} color="#cfe8ff" position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[14, 14, 1]} />
+        <Lightformer form="rect" intensity={2.6} color="#ffe2a8" position={[6, 3, -4]} rotation-y={-Math.PI / 3} scale={[5, 4, 1]} />
+        <Lightformer form="rect" intensity={0.9} color="#9fd47a" position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} />
+      </Environment>
+      <directionalLight position={[-8, 6, 10]} intensity={0.45} color="#cfe6ff" />
       <fog attach="fog" args={['#fbeedb', 34, 105]} />
     </>
   );

@@ -103,6 +103,8 @@ export function CameraRig() {
     }
     camera.lookAt(curLook);
     threeRef.camera = camera;
+    (threeRef as unknown as Record<string, unknown>).scene = state.scene;
+    (threeRef as unknown as Record<string, unknown>).gl = state.gl;
     threeRef.width = state.size.width;
     threeRef.height = state.size.height;
     threeRef.calls = state.gl.info.render.calls;

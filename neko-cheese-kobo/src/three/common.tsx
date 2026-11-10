@@ -10,7 +10,7 @@ import { fx } from './fx';
 const shadowMat = new THREE.MeshBasicMaterial({
   color: '#3b2a10',
   transparent: true,
-  opacity: 0.28,
+  opacity: 0.13,
   depthWrite: false,
 });
 let shadowMapSet = false;
@@ -24,7 +24,7 @@ export function BlobShadow({ size = 1, opacity = 0.28, y = 0.01 }: { size?: numb
   const mat = useMemo(() => {
     if (opacity === 0.28) return shadowMat;
     const m = shadowMat.clone();
-    m.opacity = opacity;
+    m.opacity = opacity * 0.45;
     return m;
   }, [opacity]);
   return (

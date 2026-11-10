@@ -11,6 +11,8 @@ import { agedLook, agingMaxDays, cheeseLook, DEFAULT_CHEESE, formatDays, MARK_CO
 import { setShot } from '../../three/CameraRig';
 import { BlobShadow, Glow, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
+import { SunShadow } from '../../three/realism';
+import { Environment, Lightformer } from '@react-three/drei';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { MilkCat } from '../../three/characters/MilkCat';
@@ -136,10 +138,15 @@ export default function AgingScene() {
     <>
       <color attach="background" args={['#2a1d14']} />
       <fog attach="fog" args={['#3a2a1c', 12, 30]} />
-      <hemisphereLight args={['#ffe9c8', '#6a4a30', 1.35]} />
-      <directionalLight position={[3, 7, -6]} intensity={1.6} color="#ffe6bf" />
-      <pointLight position={[0, 3.2, -11]} intensity={16} distance={10} color="#ffcf8a" />
-      <pointLight position={[0, 2.8, -2.5]} intensity={8} distance={8} color="#ffd9a0" />
+      <hemisphereLight args={['#ffe9c8', '#6a4a30', 0.7]} />
+      <SunShadow position={[3, 9, 4]} intensity={2.6} color="#ffe2b0" range={9} focus={[0, 0, -11]} />
+      <Environment resolution={64} frames={1}>
+        <Lightformer form="rect" intensity={1.6} color="#ffdca8" position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />
+        <Lightformer form="rect" intensity={1.2} color="#ffb060" position={[-5, 2, 3]} rotation-y={Math.PI / 2} scale={[4, 3, 1]} />
+        <Lightformer form="rect" intensity={0.4} color="#6a4a30" position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[10, 10, 1]} />
+      </Environment>
+      <pointLight position={[0, 3.2, -11]} intensity={7} distance={10} color="#ffcf8a" />
+      <pointLight position={[0, 2.8, -2.5]} intensity={4} distance={8} color="#ffd9a0" />
 
       <Corridor />
       <BigDoor open={open} onTap={tapDoor} doorRef={doorRef} />
@@ -263,8 +270,8 @@ function Corridor() {
   const stone = stoneTex();
   return (
     <group>
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0, -8]}>
-        <planeGeometry args={[12, 24]} />
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0, -4]}>
+        <planeGeometry args={[12, 36]} />
         <meshStandardMaterial map={stone} color="#b8a48c" roughness={0.95} />
       </mesh>
       {[-4.2, 4.2].map((x) => (

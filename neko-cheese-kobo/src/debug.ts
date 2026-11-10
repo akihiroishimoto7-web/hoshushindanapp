@@ -17,6 +17,7 @@ export function installDebug() {
     }),
     targets: listTargets,
     screenPos: screenPosOf,
-    perf: () => ({ ...threeRef, camera: undefined }),
+    perf: () => ({ calls: threeRef.calls, tris: threeRef.tris, geos: threeRef.geos, texs: threeRef.texs, width: threeRef.width, height: threeRef.height }),
+    three: threeRef,
   };
 }

@@ -12,6 +12,8 @@ import { agedLook, agingMaxDays, DEFAULT_CHEESE, formatDays, MARK_COLOR, TYPE_NA
 import { setShot } from '../../three/CameraRig';
 import { BlobShadow, Motes, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
+import { SunShadow } from '../../three/realism';
+import { Environment, Lightformer } from '@react-three/drei';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { MilkCat } from '../../three/characters/MilkCat';
@@ -416,9 +418,14 @@ function ShopRoom() {
   return (
     <group>
       <color attach="background" args={['#fff3e6']} />
-      <hemisphereLight args={['#fff8ec', '#d9a066', 1.25]} />
-      <directionalLight position={[3, 8, 6]} intensity={1.8} color="#fff4e0" />
-      <pointLight position={[0, 3.6, 1]} intensity={10} distance={10} color="#ffe2b0" />
+      <hemisphereLight args={['#fff8ec', '#d9a066', 0.7]} />
+      <SunShadow position={[4, 9, 6]} intensity={2.8} color="#fff0d8" range={8} />
+      <Environment resolution={64} frames={1}>
+        <Lightformer form="rect" intensity={2.4} color="#fff6e6" position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />
+        <Lightformer form="rect" intensity={1.5} color="#ffe2c0" position={[5, 2, 3]} rotation-y={-Math.PI / 2} scale={[4, 3, 1]} />
+        <Lightformer form="rect" intensity={0.6} color="#d9a066" position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[10, 10, 1]} />
+      </Environment>
+      <pointLight position={[0, 3.6, 1]} intensity={4} distance={10} color="#ffe2b0" />
       <mesh rotation-x={-Math.PI / 2} position-z={6}>
         <planeGeometry args={[40, 30]} />
         <meshStandardMaterial map={floor} roughness={0.85} />

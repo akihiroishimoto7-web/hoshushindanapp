@@ -62,7 +62,7 @@ export function VatSurface({
   const geo = useMemo(() => makeDisc(VAT.r - 0.02, 22, 56), []);
   const base = useMemo(() => Float32Array.from(geo.attributes.position.array as Float32Array), [geo]);
   const mat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#fffdf6', roughness: 0.22, emissive: '#fff4dc', emissiveIntensity: 0.12, metalness: 0 }),
+    () => new THREE.MeshPhysicalMaterial({ color: '#fffdf6', roughness: 0.2, emissive: '#fff4dc', emissiveIntensity: 0.1, clearcoat: 1, clearcoatRoughness: 0.08 }),
     [],
   );
   const milkC = useMemo(() => new THREE.Color('#fffdf6'), []);
@@ -83,7 +83,9 @@ export function VatSurface({
     m.position.y = y;
     const c = curd.current;
     mat.color.copy(milkC).lerp(curdC, c);
-    mat.roughness = 0.22 + c * 0.38;
+    mat.roughness = 0.2 + c * 0.3;
+    mat.clearcoat = 1 - c * 0.65;
+    mat.clearcoatRoughness = 0.08 + c * 0.35;
     const rs = ripples.current.filter((r) => t - r.t0 < 3.5);
     ripples.current = rs;
     const idle = Math.sin(t * 1.2) * 0.004;
