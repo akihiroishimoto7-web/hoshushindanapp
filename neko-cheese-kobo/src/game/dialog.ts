@@ -245,6 +245,7 @@ export const dialog = {
     if (!m) return false;
     const s = m.steps[m.i];
     if (!s || s.t !== 'task' || s.id !== id) return false;
+    bus.emit('taskDone', id);
     if (sideActive()) {
       doneTasks.add(id);
       return true;

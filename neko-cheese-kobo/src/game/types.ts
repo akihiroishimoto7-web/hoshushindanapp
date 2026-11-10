@@ -10,7 +10,8 @@ export type Emotion =
   | 'oops'
   | 'wink'
   | 'gentle'
-  | 'proud';
+  | 'proud'
+  | 'love';
 
 /** ミルクの身ぶり */
 export type Gesture =
@@ -23,7 +24,10 @@ export type Gesture =
   | 'bow'
   | 'spin'
   | 'paw'
-  | 'stir';
+  | 'stir'
+  | 'cheer'
+  | 'purr'
+  | 'shy';
 
 export type Speaker = 'milk' | 'girl' | 'narrator';
 

@@ -43,26 +43,65 @@ function make(
   return t;
 }
 
-/** 茶トラ（ミルクの毛） */
+/**
+ * 茶トラ（ミルクの毛）。
+ * 球の UV に あわせて、かおの 正面（u=0.25）は あかるく なめらかに、
+ * おでこに 「M」の しま、うしろと よこに しま、ぜんたいに こまかい 毛の ながれ を描く。
+ */
 export function tabbyTex(base = '#f4a85c', stripe = '#d27a2c', key = 'tabby') {
-  return make(key, 256, 256, (g, w, h) => {
+  return make(key, 512, 512, (g, w, h) => {
     g.fillStyle = base;
     g.fillRect(0, 0, w, h);
     const r = rng(7);
+    const fx = w * 0.25;
+    // うしろ・よこの しま（かおの 正面は さける）
     g.strokeStyle = stripe;
     g.lineCap = 'round';
-    for (let i = 0; i < 9; i++) {
-      const x = (i / 9) * w + r() * 8;
-      g.lineWidth = 9 + r() * 8;
+    for (let i = 0; i < 11; i++) {
+      const x = w * 0.5 + (i / 11) * w * 0.5 + r() * 10;
+      g.lineWidth = 14 + r() * 12;
+      g.globalAlpha = 0.85;
       g.beginPath();
-      g.moveTo(x, h * 0.05);
-      for (let y = 0; y <= h * 0.75; y += 16) g.lineTo(x + Math.sin(y * 0.05 + i) * 7, y);
+      g.moveTo(x, h * 0.06);
+      for (let y = h * 0.06; y <= h * 0.7; y += 24) g.lineTo(x + Math.sin(y * 0.03 + i) * 10, y);
       g.stroke();
     }
-    // ふわふわ感
-    for (let i = 0; i < 1400; i++) {
-      g.fillStyle = r() > 0.5 ? 'rgba(255,240,220,0.10)' : 'rgba(120,60,20,0.08)';
-      g.fillRect(r() * w, r() * h, 1.5, 4);
+    // おでこの しま
+    g.globalAlpha = 0.9;
+    [-0.055, 0, 0.055].forEach((dx, i) => {
+      g.lineWidth = i === 1 ? 15 : 12;
+      g.beginPath();
+      g.moveTo(fx + dx * w, h * 0.05);
+      g.quadraticCurveTo(fx + dx * w * 1.2, h * 0.14, fx + dx * w * 0.9, h * (i === 1 ? 0.27 : 0.24));
+      g.stroke();
+    });
+    // ほっぺの しま
+    [-1, 1].forEach((sx) => {
+      [0.47, 0.54].forEach((yy, k) => {
+        g.lineWidth = 10;
+        g.beginPath();
+        g.moveTo(fx + sx * w * 0.2, h * yy);
+        g.quadraticCurveTo(fx + sx * w * 0.16, h * (yy + 0.01), fx + sx * w * (0.12 + k * 0.01), h * (yy + 0.03));
+        g.stroke();
+      });
+    });
+    g.globalAlpha = 1;
+    // かお・むねは あかるい クリームいろに
+    const grd = g.createRadialGradient(fx, h * 0.62, 10, fx, h * 0.62, w * 0.2);
+    grd.addColorStop(0, 'rgba(255,240,214,0.85)');
+    grd.addColorStop(1, 'rgba(255,240,214,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, w, h);
+    // こまかい 毛の ながれ
+    for (let i = 0; i < 5200; i++) {
+      g.strokeStyle = r() > 0.5 ? 'rgba(255,244,224,0.16)' : 'rgba(130,64,18,0.10)';
+      g.lineWidth = 1 + r();
+      const x = r() * w;
+      const y = r() * h;
+      g.beginPath();
+      g.moveTo(x, y);
+      g.lineTo(x + (r() - 0.5) * 5, y + 5 + r() * 9);
+      g.stroke();
     }
   });
 }
@@ -331,6 +370,65 @@ export function sparkTex() {
       }
       g.closePath();
       g.fill();
+    },
+    { srgb: false },
+  );
+}
+
+/** パーティクル用: まる・ほし・ハート・わ を 2x2 に ならべた 1まい */
+export function fxAtlasTex() {
+  return make(
+    'fx-atlas',
+    256,
+    256,
+    (g) => {
+      const S = 128;
+      // 0: ぼかした まる
+      let grd = g.createRadialGradient(64, 64, 0, 64, 64, 62);
+      grd.addColorStop(0, 'rgba(255,255,255,1)');
+      grd.addColorStop(0.5, 'rgba(160,160,160,0.55)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd;
+      g.fillRect(0, 0, S, S);
+      // 1: ほし
+      const cx = S + 64;
+      const cy = 64;
+      grd = g.createRadialGradient(cx, cy, 0, cx, cy, 62);
+      grd.addColorStop(0, 'rgba(255,255,255,0.9)');
+      grd.addColorStop(0.25, 'rgba(200,200,200,0.45)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd;
+      g.fillRect(S, 0, S, S);
+      g.fillStyle = 'rgba(255,255,255,0.97)';
+      g.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const rr = i % 2 ? 9 : 58;
+        g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+      }
+      g.closePath();
+      g.fill();
+      // 2: ハート
+      const hx = 64;
+      const hy = S + 60;
+      const s = 96;
+      g.fillStyle = 'rgba(90,90,90,1)';
+      g.beginPath();
+      const top = hy - s * 0.15;
+      g.moveTo(hx, hy + s * 0.42);
+      g.bezierCurveTo(hx - s * 0.62, hy, hx - s * 0.42, top - s * 0.38, hx, top);
+      g.bezierCurveTo(hx + s * 0.42, top - s * 0.38, hx + s * 0.62, hy, hx, hy + s * 0.42);
+      g.fill();
+      g.fillStyle = 'rgba(255,255,255,0.95)';
+      g.beginPath();
+      g.ellipse(hx - 17, hy - 20, 9, 6, -0.6, 0, Math.PI * 2);
+      g.fill();
+      // 3: わ
+      g.strokeStyle = 'rgba(200,200,200,1)';
+      g.lineWidth = 9;
+      g.beginPath();
+      g.arc(S + 64, S + 64, 52, 0, Math.PI * 2);
+      g.stroke();
     },
     { srgb: false },
   );

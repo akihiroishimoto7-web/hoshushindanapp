@@ -2,23 +2,132 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import * as THREE from 'three';
 import { BlobShadow } from '../common';
+import { bake, G, type Part } from '../bake';
+import { bakedMat, unlitMat } from '../look';
 
 /**
  * 主人公の女の子（プレイヤー）。チーズ色のワンピースに、赤いリボンの ふたつむすび。
+ * パーツは 頂点カラーで まとめて 10 ドローコールほど。
  */
-const mats = {
-  skin: new THREE.MeshStandardMaterial({ color: '#ffd9c2', roughness: 0.8 }),
-  hair: new THREE.MeshStandardMaterial({ color: '#6b3f22', roughness: 0.65 }),
-  dress: new THREE.MeshStandardMaterial({ color: '#ffd24a', roughness: 0.75 }),
-  collar: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.8 }),
-  ribbon: new THREE.MeshStandardMaterial({ color: '#ef4e5e', roughness: 0.5 }),
-  shoe: new THREE.MeshStandardMaterial({ color: '#d8414f', roughness: 0.45 }),
-  dark: new THREE.MeshStandardMaterial({ color: '#2a1a12', roughness: 0.3 }),
-  shine: new THREE.MeshBasicMaterial({ color: '#ffffff' }),
-  blush: new THREE.MeshBasicMaterial({ color: '#ff8fa3', transparent: true, opacity: 0.5, depthWrite: false }),
-  mouth: new THREE.MeshStandardMaterial({ color: '#c94b55', roughness: 0.5 }),
-  dot: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.7 }),
-};
+const SKIN = '#ffdcc6';
+const HAIR = '#7a4526';
+const HAIR2 = '#8f5530';
+const DRESS = '#ffd24a';
+const RED = '#ef4e5e';
+
+let cheerFlag = 0;
+/** 「やったー！」と とびはねる（シーンから呼ぶ） */
+export function girlCheer() {
+  cheerFlag++;
+}
+
+interface Assets {
+  leg: THREE.BufferGeometry;
+  arm: THREE.BufferGeometry;
+  body: THREE.BufferGeometry;
+  head: THREE.BufferGeometry;
+  tails: THREE.BufferGeometry;
+  eyes: THREE.BufferGeometry;
+  happy: THREE.BufferGeometry;
+  blush: THREE.BufferGeometry;
+}
+let assets: Assets | null = null;
+const blushMat = new THREE.MeshBasicMaterial({ color: '#ff7d96', transparent: true, opacity: 0.5, depthWrite: false });
+
+function build(): Assets {
+  const leg = bake([
+    { geo: G.capsule(0.055, 0.2, 8), color: SKIN, pos: [0, -0.14, 0] },
+    { geo: G.cyl(0.062, 0.058, 0.1, 10), color: '#ffffff', pos: [0, -0.21, 0] },
+    { geo: G.sphere(0.078, 12, 8), color: '#d8414f', pos: [0, -0.29, 0.03], scale: [1, 0.65, 1.45] },
+  ]);
+  const arm = bake([
+    { geo: G.sphere(0.075, 10, 8), color: '#fff6dc', pos: [0, -0.02, 0], scale: [1, 0.9, 1] },
+    { geo: G.capsule(0.043, 0.19, 8), color: SKIN, pos: [0, -0.16, 0] },
+    { geo: G.sphere(0.052, 10, 8), color: SKIN, pos: [0, -0.3, 0] },
+  ]);
+  const pts = [
+    [0.0, 0.0],
+    [0.36, 0.0],
+    [0.37, 0.03],
+    [0.31, 0.14],
+    [0.2, 0.38],
+    [0.16, 0.5],
+    [0.15, 0.58],
+    [0.0, 0.6],
+  ].map(([x, y]) => new THREE.Vector2(x, y));
+  const body: Part[] = [
+    { geo: new THREE.LatheGeometry(pts, 24), color: DRESS, pos: [0, 0.24, 0] },
+    // すその しろい ライン
+    { geo: G.torus(0.355, 0.02, 6, 28), color: '#fff6dc', pos: [0, 0.265, 0], rot: [Math.PI / 2, 0, 0] },
+    { geo: G.torus(0.13, 0.042, 8, 18), color: '#ffffff', pos: [0, 0.82, 0], rot: [Math.PI / 2, 0, 0] },
+    // むねの リボン
+    { geo: G.sphere(0.04, 8, 6), color: RED, pos: [-0.04, 0.775, 0.14], scale: [1.3, 0.8, 0.5] },
+    { geo: G.sphere(0.04, 8, 6), color: RED, pos: [0.04, 0.775, 0.14], scale: [1.3, 0.8, 0.5] },
+  ];
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + 0.4;
+    const y = 0.34 + (i % 2) * 0.14;
+    const r = 0.305 - (i % 2) * 0.07;
+    body.push({ geo: G.sphere(0.028, 8, 6), color: '#ffffff', pos: [Math.sin(a) * r, y, Math.cos(a) * r] });
+  }
+  const head: Part[] = [
+    { geo: G.sphere(0.28, 28, 22), color: SKIN, pos: [0, 0.25, 0], scale: [1.04, 0.97, 1] },
+    // かみ（あたまの うえ と うしろ）
+    { geo: new THREE.SphereGeometry(0.295, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.46), color: HAIR, pos: [0, 0.27, -0.03], rot: [-0.32, 0, 0], scale: [1.06, 1, 1.05] },
+    { geo: new THREE.SphereGeometry(0.29, 20, 16, Math.PI * 1.0, Math.PI * 1.0, 0, Math.PI * 0.82), color: HAIR, pos: [0, 0.25, -0.03], scale: [1.07, 1.08, 1.03] },
+    // はな と くち
+    { geo: G.sphere(0.012, 6, 5), color: '#f5b9a0', pos: [0, 0.2, 0.283] },
+    // みみ
+    { geo: G.sphere(0.045, 8, 6), color: SKIN, pos: [-0.285, 0.22, 0.0], scale: [0.6, 1, 0.8] },
+    { geo: G.sphere(0.045, 8, 6), color: SKIN, pos: [0.285, 0.22, 0.0], scale: [0.6, 1, 0.8] },
+    // あほげ
+    { geo: G.cone(0.03, 0.12, 6), color: HAIR2, pos: [0.02, 0.6, 0], rot: [0, 0, -0.5] },
+  ];
+  // まえがみ（ぱっつん ぎみに ならべる）
+  [-0.2, -0.1, 0, 0.1, 0.2].forEach((x, i) => {
+    head.push({ geo: G.sphere(0.085, 10, 8), color: i % 2 ? HAIR2 : HAIR, pos: [x, 0.445 - Math.abs(x) * 0.2, 0.2 - Math.abs(x) * 0.3], scale: [0.85, 0.6, 0.55] });
+  });
+  const tails: Part[] = [];
+  [-1, 1].forEach((sx) => {
+    tails.push(
+      { geo: G.sphere(0.11, 12, 10), color: HAIR, pos: [sx * 0.37, 0.2, -0.05], scale: [0.8, 1.35, 0.8], rot: [0, 0, sx * 0.25] },
+      { geo: G.sphere(0.07, 10, 8), color: HAIR2, pos: [sx * 0.4, 0.06, -0.05], scale: [0.8, 1.1, 0.8] },
+      { geo: G.sphere(0.055, 8, 6), color: RED, pos: [sx * 0.3, 0.35, -0.02], scale: [1.3, 0.8, 0.6], rot: [0, 0, sx * 0.6] },
+      { geo: G.sphere(0.055, 8, 6), color: RED, pos: [sx * 0.33, 0.3, -0.02], scale: [0.8, 1.3, 0.6], rot: [0, 0, sx * 0.6] },
+      { geo: G.sphere(0.03, 8, 6), color: '#ff8fa3', pos: [sx * 0.31, 0.325, 0.02] },
+    );
+  });
+  const eyes: Part[] = [];
+  const happy: Part[] = [];
+  [-1, 1].forEach((sx) => {
+    const x = sx * 0.105;
+    const ry = sx * 0.33;
+    eyes.push(
+      { geo: G.sphere(1, 16, 12), color: '#3a2012', pos: [x, 0, 0], rot: [0, ry, 0], scale: [0.052, 0.072, 0.025] },
+      { geo: G.sphere(1, 12, 10), color: '#8a5230', pos: [x, -0.02, 0.012], rot: [0, ry, 0], scale: [0.038, 0.04, 0.02] },
+      { geo: G.sphere(1, 10, 8), color: '#ffffff', pos: [x + 0.016, 0.028, 0.026], scale: [0.02, 0.022, 0.01] },
+      { geo: G.sphere(1, 8, 6), color: '#ffffff', pos: [x - 0.018, -0.02, 0.026], scale: [0.009, 0.01, 0.006] },
+      // まつげ・まゆ
+      { geo: G.box(0.04, 0.008, 0.008), color: '#3a2012', pos: [x + sx * 0.05, 0.05, 0.0], rot: [0, ry, sx * 0.5] },
+      { geo: G.box(0.07, 0.01, 0.008), color: '#6a3c20', pos: [x, 0.125, 0.008], rot: [0, ry, -sx * 0.12] },
+      // くち（にっこり）
+    );
+    happy.push(
+      { geo: G.torus(0.04, 0.013, 6, 12, Math.PI), color: '#3a2012', pos: [x, -0.012, 0.012], rot: [0, ry, 0], scale: [1, 1, 0.6] },
+      { geo: G.box(0.07, 0.01, 0.008), color: '#6a3c20', pos: [x, 0.125, 0.008], rot: [0, ry, -sx * 0.25] },
+    );
+  });
+  eyes.push({ geo: G.torus(0.04, 0.011, 6, 12, Math.PI), color: '#c94b55', pos: [0, -0.1, 0.0], rot: [0, 0, Math.PI] });
+  happy.push(
+    { geo: G.sphere(0.045, 12, 10), color: '#b93a48', pos: [0, -0.115, -0.005], scale: [1, 0.8, 0.3] },
+    { geo: G.sphere(0.028, 8, 6), color: '#ff8fa3', pos: [0, -0.135, 0.005], scale: [1, 0.5, 0.3] },
+  );
+  const blush = bake([
+    { geo: G.sphere(0.05, 10, 8), pos: [-0.18, 0.155, 0.215], rot: [0, -0.6, 0], scale: [1, 0.62, 0.2] },
+    { geo: G.sphere(0.05, 10, 8), pos: [0.18, 0.155, 0.215], rot: [0, 0.6, 0], scale: [1, 0.62, 0.2] },
+  ]);
+  return { leg, arm, body: bake(body), head: bake(head), tails: bake(tails), eyes: bake(eyes), happy: bake(happy), blush };
+}
 
 export function Girl({
   groupRef,
@@ -34,31 +143,21 @@ export function Girl({
   position?: THREE.Vector3Tuple;
   rotationY?: number;
 }) {
+  if (!assets) assets = build();
+  const A = assets;
   const own = useRef<THREE.Group>(null);
   const root = groupRef ?? own;
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
-  const legL = useRef<THREE.Group>(null);
-  const legR = useRef<THREE.Group>(null);
-  const armL = useRef<THREE.Group>(null);
-  const armR = useRef<THREE.Group>(null);
-  const eyes = useRef<THREE.Group>(null);
-  const tails = useRef<THREE.Group>(null);
-  const st = useRef({ last: new THREE.Vector3(), speed: 0, phase: 0, blinkAt: 1.5 });
+  const legL = useRef<THREE.Mesh>(null);
+  const legR = useRef<THREE.Mesh>(null);
+  const armL = useRef<THREE.Mesh>(null);
+  const armR = useRef<THREE.Mesh>(null);
+  const eyes = useRef<THREE.Mesh>(null);
+  const happy = useRef<THREE.Mesh>(null);
+  const tails = useRef<THREE.Mesh>(null);
+  const st = useRef({ last: new THREE.Vector3(), speed: 0, phase: 0, blinkAt: 1.5, cheerN: cheerFlag, cheerT: -10 });
   const v = useMemo(() => new THREE.Vector3(), []);
-
-  const dressGeo = useMemo(() => {
-    const pts = [
-      new THREE.Vector2(0.0, 0.0),
-      new THREE.Vector2(0.34, 0.0),
-      new THREE.Vector2(0.3, 0.12),
-      new THREE.Vector2(0.2, 0.38),
-      new THREE.Vector2(0.16, 0.5),
-      new THREE.Vector2(0.15, 0.58),
-      new THREE.Vector2(0.0, 0.6),
-    ];
-    return new THREE.LatheGeometry(pts, 24);
-  }, []);
 
   useFrame((state, dt0) => {
     const dt = Math.min(dt0, 0.05);
@@ -70,125 +169,70 @@ export function Girl({
       s.last.copy(v);
       s.speed = THREE.MathUtils.lerp(s.speed, sp > 20 ? 0 : sp, 0.2);
     }
+    if (s.cheerN !== cheerFlag) {
+      s.cheerN = cheerFlag;
+      s.cheerT = t;
+    }
+    const ck = (t - s.cheerT) / 1.2;
+    const cheering = ck >= 0 && ck < 1;
+    const hop = cheering ? Math.abs(Math.sin(ck * Math.PI * 2)) : 0;
     const walking = s.speed > 0.25;
     s.phase += dt * (walking ? 11 : 0);
     const sw = walking ? Math.sin(s.phase) : 0;
     if (body.current) {
-      body.current.position.y = walking ? Math.abs(Math.sin(s.phase)) * 0.05 : Math.sin(t * 2) * 0.008;
+      body.current.position.y = hop * 0.28 + (walking ? Math.abs(Math.sin(s.phase)) * 0.05 : Math.sin(t * 2) * 0.008);
+      const sq = cheering ? (hop - 0.5) * 0.1 : 0;
+      body.current.scale.set(1 - sq * 0.5, 1 + sq, 1 - sq * 0.5);
+      body.current.rotation.z = walking ? Math.sin(s.phase) * 0.04 : 0;
     }
     if (legL.current) legL.current.rotation.x = sw * 0.6;
     if (legR.current) legR.current.rotation.x = -sw * 0.6;
+    const lerp = THREE.MathUtils.lerp;
     if (armL.current) {
-      armL.current.rotation.x = carry ? -1.1 : -sw * 0.5;
-      armL.current.rotation.z = carry ? -0.15 : 0.18;
+      armL.current.rotation.x = lerp(armL.current.rotation.x, carry ? -1.1 : cheering ? 0 : -sw * 0.5, 0.3);
+      armL.current.rotation.z = lerp(armL.current.rotation.z, carry ? -0.15 : cheering ? 2.5 : 0.2, 0.3);
     }
     if (armR.current) {
-      armR.current.rotation.x = carry ? -1.1 : sw * 0.5;
-      armR.current.rotation.z = carry ? 0.15 : -0.18;
+      armR.current.rotation.x = lerp(armR.current.rotation.x, carry ? -1.1 : cheering ? 0 : sw * 0.5, 0.3);
+      armR.current.rotation.z = lerp(armR.current.rotation.z, carry ? 0.15 : cheering ? -2.5 : -0.2, 0.3);
     }
-    if (head.current) head.current.rotation.z = Math.sin(t * 0.8) * 0.04;
-    if (tails.current) tails.current.rotation.x = walking ? Math.sin(s.phase * 2) * 0.12 : Math.sin(t * 1.5) * 0.04;
+    if (head.current) {
+      head.current.rotation.z = Math.sin(t * 0.8) * 0.04;
+      head.current.rotation.x = cheering ? -0.15 : 0;
+    }
+    if (tails.current) {
+      tails.current.rotation.x = walking ? Math.sin(s.phase * 2) * 0.12 : Math.sin(t * 1.5) * 0.04;
+      tails.current.position.y = -hop * 0.05;
+    }
     let blink = 1;
     if (t > s.blinkAt) {
       const k = (t - s.blinkAt) / 0.13;
       blink = k < 1 ? Math.abs(1 - 2 * k) * 0.9 + 0.1 : 1;
       if (k >= 1) s.blinkAt = t + 2.5 + Math.random() * 3;
     }
-    if (eyes.current) eyes.current.scale.y = blink;
+    if (eyes.current) {
+      eyes.current.visible = !cheering;
+      eyes.current.scale.y = blink;
+    }
+    if (happy.current) happy.current.visible = cheering;
   });
 
   return (
-    <group ref={root} position={position} rotation-y={rotationY}>
-      <BlobShadow size={0.85} />
+    <group ref={root} position={position} rotation-y={rotationY} dispose={null}>
+      <BlobShadow size={0.9} />
       <group ref={body}>
-        {[-1, 1].map((sx) => (
-          <group key={sx} ref={sx < 0 ? legR : legL} position={[sx * 0.09, 0.32, 0]}>
-            <mesh material={mats.skin} position-y={-0.14}>
-              <capsuleGeometry args={[0.055, 0.2, 4, 8]} />
-            </mesh>
-            <mesh material={mats.shoe} position={[0, -0.29, 0.03]} scale={[1, 0.65, 1.4]}>
-              <sphereGeometry args={[0.075, 12, 8]} />
-            </mesh>
-          </group>
-        ))}
-        {/* ワンピース（チーズいろ・みずたま） */}
-        <mesh geometry={dressGeo} material={mats.dress} position-y={0.24} />
-        {[0, 1, 2, 3, 4, 5].map((i) => {
-          const a = (i / 6) * Math.PI * 2 + 0.4;
-          const y = 0.32 + (i % 2) * 0.12;
-          const r = 0.31 - (i % 2) * 0.06;
-          return (
-            <mesh key={i} material={mats.dot} position={[Math.sin(a) * r, y, Math.cos(a) * r]}>
-              <sphereGeometry args={[0.028, 8, 6]} />
-            </mesh>
-          );
-        })}
-        <mesh material={mats.collar} position-y={0.82} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[0.13, 0.04, 8, 18]} />
-        </mesh>
-        {[-1, 1].map((sx) => (
-          <group key={sx} ref={sx < 0 ? armR : armL} position={[sx * 0.19, 0.78, 0]}>
-            <mesh material={mats.skin} position-y={-0.15}>
-              <capsuleGeometry args={[0.045, 0.2, 4, 8]} />
-            </mesh>
-          </group>
-        ))}
+        <mesh ref={legL} geometry={A.leg} material={bakedMat(0.75, 0.3)} position={[0.09, 0.32, 0]} />
+        <mesh ref={legR} geometry={A.leg} material={bakedMat(0.75, 0.3)} position={[-0.09, 0.32, 0]} />
+        <mesh geometry={A.body} material={bakedMat(0.75, 0.3)} />
+        <mesh ref={armL} geometry={A.arm} material={bakedMat(0.75, 0.3)} position={[0.2, 0.78, 0]} rotation-z={0.2} />
+        <mesh ref={armR} geometry={A.arm} material={bakedMat(0.75, 0.3)} position={[-0.2, 0.78, 0]} rotation-z={-0.2} />
         {carry && holding && <group position={[0, 0.55, 0.36]}>{holding}</group>}
-        {/* あたま */}
         <group ref={head} position-y={0.86}>
-          <mesh material={mats.skin} position-y={0.24}>
-            <sphereGeometry args={[0.27, 24, 20]} />
-          </mesh>
-          {/* かみ */}
-          <mesh material={mats.hair} position={[0, 0.3, -0.03]} scale={[1.06, 1.0, 1.04]}>
-            <sphereGeometry args={[0.28, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
-          </mesh>
-          <mesh material={mats.hair} position={[0, 0.25, -0.06]} scale={[1.05, 1.05, 1]}>
-            <sphereGeometry args={[0.27, 20, 16, Math.PI * 0.6, Math.PI * 0.8]} />
-          </mesh>
-          {/* まえがみ */}
-          {[-0.12, 0, 0.12].map((x, i) => (
-            <mesh key={i} material={mats.hair} position={[x, 0.42, 0.18]} scale={[1, 0.6, 0.6]}>
-              <sphereGeometry args={[0.1, 12, 8]} />
-            </mesh>
-          ))}
-          {/* ふたつむすび */}
-          <group ref={tails}>
-            {[-1, 1].map((sx) => (
-              <group key={sx} position={[sx * 0.28, 0.3, -0.05]}>
-                <mesh material={mats.hair} position={[sx * 0.08, -0.1, 0]} scale={[0.8, 1.3, 0.8]}>
-                  <sphereGeometry args={[0.1, 12, 10]} />
-                </mesh>
-                <mesh material={mats.ribbon} position={[0, 0.02, 0]} rotation-z={sx * 0.5}>
-                  <torusGeometry args={[0.05, 0.025, 6, 12]} />
-                </mesh>
-                <mesh material={mats.ribbon} position={[sx * 0.03, 0.05, 0]} scale={[1.4, 0.8, 0.5]}>
-                  <sphereGeometry args={[0.05, 8, 6]} />
-                </mesh>
-              </group>
-            ))}
-          </group>
-          {/* かお */}
-          <group ref={eyes} position={[0, 0.23, 0.24]}>
-            {[-1, 1].map((sx) => (
-              <group key={sx} position={[sx * 0.09, 0, 0]} rotation-y={sx * 0.3}>
-                <mesh material={mats.dark} scale={[0.8, 1.15, 0.45]}>
-                  <sphereGeometry args={[0.045, 12, 10]} />
-                </mesh>
-                <mesh material={mats.shine} position={[0.013, 0.02, 0.022]}>
-                  <sphereGeometry args={[0.013, 8, 6]} />
-                </mesh>
-              </group>
-            ))}
-          </group>
-          {[-1, 1].map((sx) => (
-            <mesh key={sx} material={mats.blush} position={[sx * 0.16, 0.15, 0.2]} rotation-y={sx * 0.6} scale={[1, 0.6, 0.2]}>
-              <sphereGeometry args={[0.045, 10, 8]} />
-            </mesh>
-          ))}
-          <mesh material={mats.mouth} position={[0, 0.13, 0.262]} rotation-z={Math.PI}>
-            <torusGeometry args={[0.035, 0.01, 6, 12, Math.PI]} />
-          </mesh>
+          <mesh geometry={A.head} material={bakedMat(0.75, 0.3)} />
+          <mesh ref={tails} geometry={A.tails} material={bakedMat(0.75, 0.3)} />
+          <mesh ref={eyes} geometry={A.eyes} material={unlitMat()} position={[0, 0.235, 0.262]} />
+          <mesh ref={happy} geometry={A.happy} material={unlitMat()} position={[0, 0.235, 0.262]} visible={false} />
+          <mesh geometry={A.blush} material={blushMat} />
         </group>
       </group>
     </group>

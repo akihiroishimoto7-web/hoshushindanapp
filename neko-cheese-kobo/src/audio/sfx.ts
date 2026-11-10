@@ -27,7 +27,13 @@ export type SfxName =
   | 'drip'
   | 'magic'
   | 'boing'
-  | 'bell';
+  | 'bell'
+  | 'purr'
+  | 'yay'
+  | 'secret'
+  | 'squeak'
+  | 'plop'
+  | 'ting';
 
 type A = NonNullable<ReturnType<typeof getAudio>>;
 
@@ -272,5 +278,61 @@ export function playSfx(name: SfxName) {
       tone(a, 'sine', 1568, 1560, 0.9, 0.12);
       tone(a, 'sine', 2350, 2340, 0.6, 0.05);
       break;
+    case 'purr': {
+      // ゴロゴロ（ひくい音を こまかく ふるわせる）
+      const t = a.ctx.currentTime;
+      const o = a.ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = 46;
+      const lp = a.ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 260;
+      const trem = a.ctx.createOscillator();
+      const tg = a.ctx.createGain();
+      trem.frequency.value = 24;
+      tg.gain.value = 0.12;
+      const g = a.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.2, t + 0.15);
+      g.gain.linearRampToValueAtTime(0.16, t + 0.7);
+      g.gain.linearRampToValueAtTime(0.0001, t + 1.1);
+      trem.connect(tg).connect(g.gain);
+      o.connect(lp).connect(g).connect(a.sfx);
+      o.start(t);
+      trem.start(t);
+      o.stop(t + 1.2);
+      trem.stop(t + 1.2);
+      break;
+    }
+    case 'yay': {
+      // できた！の みじかい ファンファーレ
+      [659.25, 783.99, 1046.5].forEach((f, i) => {
+        tone(a, 'triangle', f, f, 0.22, 0.14, i * 0.07);
+        tone(a, 'sine', f * 2, f * 2, 0.2, 0.04, i * 0.07);
+      });
+      break;
+    }
+    case 'secret': {
+      // ひみつ はっけん！（きらきら のぼる）
+      [783.99, 987.77, 1174.66, 1567.98, 1975.53].forEach((f, i) => {
+        tone(a, 'sine', f, f, 0.5, 0.1, i * 0.08);
+        tone(a, 'triangle', f / 2, f / 2, 0.3, 0.05, i * 0.08);
+      });
+      break;
+    }
+    case 'squeak':
+      tone(a, 'sine', 1900, 2700, 0.07, 0.12);
+      tone(a, 'sine', 2300, 3100, 0.07, 0.1, 0.11);
+      break;
+    case 'plop':
+      tone(a, 'sine', 520, 180, 0.12, 0.22);
+      tone(a, 'sine', 300, 900, 0.07, 0.08, 0.09);
+      break;
+    case 'ting': {
+      const f = PENTA[Math.floor(Math.random() * PENTA.length)] * 2;
+      tone(a, 'sine', f, f, 0.5, 0.09);
+      tone(a, 'sine', f * 2.01, f * 2, 0.3, 0.03);
+      break;
+    }
   }
 }
