@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { plasterTex, woodTex } from '../tex';
-import { BlobShadow } from '../common';
+import { BlobShadow, Glow, Motes } from '../common';
 import { CheeseWheel } from '../props/Cheese';
 
 /**
@@ -148,6 +148,13 @@ export function WorkshopRoom({ children }: { children?: ReactNode }) {
           </mesh>
         </group>
       ))}
+      {[-3, 3].map((x) => (
+        <Glow key={'w' + x} position={[x, 3.3, -4.7]} size={3.6} color="#fff3d0" opacity={0.45} />
+      ))}
+      {[-2, 2].map((x) => (
+        <Glow key={'l' + x} position={[x, 4.45, 1]} size={1.5} color="#ffd890" opacity={0.7} pulse={0.05} />
+      ))}
+      <Motes count={50} area={[8, 3.5, 5]} center={[0, 2.8, -1.5]} color="#fff3c8" size={0.07} opacity={0.55} />
       {children}
     </group>
   );

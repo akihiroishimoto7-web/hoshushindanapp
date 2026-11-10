@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { setShot } from '../three/CameraRig';
-import { SkyDome } from '../three/common';
-import { Clouds, FarmLights, Flowers, Ground, Grass, Trees, Windmill, CatHouse, Birds } from '../three/env/Farm';
+import { Motes, SkyDome } from '../three/common';
+import { DistantHills, Clouds, FarmLights, Flowers, Ground, Grass, Trees, Windmill, CatHouse, Birds } from '../three/env/Farm';
 import { MilkCat } from '../three/characters/MilkCat';
 import { Cow } from '../three/characters/Cow';
 import { CheeseWheel } from '../three/props/Cheese';
@@ -37,9 +37,11 @@ export function TitleScene() {
       <FarmLights />
       <SkyDome />
       <Clouds />
+      <DistantHills />
+      <Motes count={50} area={[14, 4, 10]} center={[0, 2.2, 1]} color="#fff8c8" size={0.1} />
       <Ground />
-      <Grass count={260} />
-      <Flowers count={60} />
+      <Grass count={420} />
+      <Flowers count={110} />
       <Trees spots={TREES} />
       <Windmill position={[-10, 0, -16]} />
       <CatHouse position={[11, -20]} rotationY={-0.4} />

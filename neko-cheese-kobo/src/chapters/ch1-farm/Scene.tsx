@@ -6,10 +6,11 @@ import { useChapterStart } from '../../game/useChapter';
 import { useBus } from '../../game/bus';
 import { dialog, useDialog } from '../../game/dialog';
 import { followShot, setShot } from '../../three/CameraRig';
-import { SkyDome, Tappable } from '../../three/common';
+import { Motes, SkyDome, Tappable } from '../../three/common';
+import { Clover, Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { targetWorldPos, useTarget } from '../../three/targets';
-import { Barn, Birds, Butterflies, CatHouse, CheeseHouse, Clouds, FarmLights, Fence, Flowers, Grass, Ground, Trees, Windmill } from '../../three/env/Farm';
+import { DistantHills, Barn, Birds, Butterflies, CatHouse, CheeseHouse, Clouds, FarmLights, Fence, Flowers, Grass, Ground, Trees, Windmill } from '../../three/env/Farm';
 import { MilkCat } from '../../three/characters/MilkCat';
 import { Girl } from '../../three/characters/Girl';
 import { Cow } from '../../three/characters/Cow';
@@ -272,9 +273,16 @@ export default function FarmScene() {
       <FarmLights />
       <SkyDome />
       <Clouds />
+      <DistantHills />
+      <Motes count={70} area={[26, 4, 22]} center={[0, 2.2, 1]} color="#fff8c8" size={0.1} />
+      <Mouse id="mouse1" position={[-6.7, 0, -3.7]} rotationY={0.9} scale={1.35} />
+      <SecretSpot id="clover" position={[2.3, 0, 4.4]} hit={0.45}>
+        <Clover />
+      </SecretSpot>
       <Ground path={PATH} onTap={onGround} />
-      <Grass avoid={AVOID} />
+      <Grass avoid={AVOID} count={700} />
       <Flowers
+        count={130}
         avoid={AVOID}
         onTap={(p) => {
           playSfx('sparkle');

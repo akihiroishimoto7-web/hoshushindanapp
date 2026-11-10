@@ -8,6 +8,7 @@ import { dialog, catGesture } from '../../game/dialog';
 import { say } from '../../game/say';
 import { setShot } from '../../three/CameraRig';
 import { Tappable } from '../../three/common';
+import { CowFace, Mouse, WindowPeek } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { Thermometer, Vat, VAT, WorkshopLights, WorkshopRoom } from '../../three/env/Workshop';
@@ -233,6 +234,10 @@ export default function CurdScene() {
         </group>
       )}
 
+      <Mouse id="mouse3" position={[0.75, 0, 1.75]} rotationY={0.3} />
+      <WindowPeek id="windowCow" position={[3, 2.45, -4.7]}>
+        <CowFace />
+      </WindowPeek>
       {bubble && <MicelleBubble hair={hair} join={join} />}
 
       <MilkCat

@@ -10,8 +10,11 @@ import { ui } from './ui/tunnel';
 import { bus } from './game/bus';
 import { playSfx, type SfxName } from './audio/sfx';
 import { installDebug } from './debug';
+import { ToastView } from './ui/Toast';
+import { praise } from './game/secrets';
 
 bus.on('sfx', (n) => playSfx(n as SfxName));
+bus.on('taskDone', () => praise());
 if (typeof window !== 'undefined' && /[?&]debug/.test(window.location.search)) installDebug();
 
 export function App() {
@@ -58,6 +61,7 @@ export function App() {
             <Hud />
           </>
         )}
+        <ToastView />
         {screen === 'clear' && <ChapterClear />}
         {screen === 'ending' && <Ending />}
       </div>

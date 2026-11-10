@@ -689,3 +689,28 @@ export function mergeSimple(parts: THREE.BufferGeometry[]) {
   geos.forEach((g, i) => g !== parts[i] && g.dispose());
   return out;
 }
+
+/** とおくの 山なみ（空気遠近法で あおく かすむ。おくゆきを 出す） */
+export function DistantHills() {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const data = useMemo(() => {
+    const r = rng(31);
+    const m: THREE.Matrix4[] = [];
+    const c: THREE.Color[] = [];
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2 + r() * 0.3;
+      const far = i % 2;
+      const d = far ? 100 : 74;
+      m.push(mtx(Math.cos(a) * d, -4, Math.sin(a) * d, [22 + r() * 16, (far ? 20 : 12) + r() * 9, 18 + r() * 10]));
+      c.push(new THREE.Color(far ? '#a9cdea' : '#8fc79a').lerp(new THREE.Color('#cfe6f5'), r() * 0.3));
+    }
+    return { m, c };
+  }, []);
+  useInstances(ref, data.m, data.c);
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, data.m.length]} frustumCulled={false}>
+      <sphereGeometry args={[1, 20, 12]} />
+      <meshBasicMaterial fog={false} />
+    </instancedMesh>
+  );
+}

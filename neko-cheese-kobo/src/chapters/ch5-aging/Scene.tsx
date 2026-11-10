@@ -9,7 +9,8 @@ import { say } from '../../game/say';
 import { useProgress } from '../../game/progress';
 import { agedLook, agingMaxDays, cheeseLook, DEFAULT_CHEESE, formatDays, MARK_COLOR } from '../../game/cheese';
 import { setShot } from '../../three/CameraRig';
-import { BlobShadow, Tappable } from '../../three/common';
+import { BlobShadow, Glow, Tappable } from '../../three/common';
+import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { MilkCat } from '../../three/characters/MilkCat';
@@ -218,6 +219,13 @@ export default function AgingScene() {
         }}
       />
       <Dust />
+      <Mouse id="mouse5" position={[-0.75, 0, -11.15]} rotationY={0.4} />
+      <SecretSpot id="oldCheese" position={[2.9, 0, -14.6]} hit={0.9}>
+        <CheeseWheel radius={0.85} height={0.5} rind="#a8672a" paste="#e9b24a" rough={1} position={[0, 0.25, 0]} />
+      </SecretSpot>
+      <Glow position={[0, 4.4, -16.8]} size={3.2} color="#fff0c0" opacity={0.55} pulse={0.04} />
+      <Glow position={[-3.6, 2.95, -3.4]} size={1.6} color="#ffc060" opacity={0.7} pulse={0.1} />
+      <Glow position={[3.6, 2.95, -3.4]} size={1.6} color="#ffc060" opacity={0.7} pulse={0.1} />
 
       {dialOn && (
         <ui.In>

@@ -8,7 +8,8 @@ import { dialog } from '../../game/dialog';
 import { game } from '../../game/game';
 import { say } from '../../game/say';
 import { setShot } from '../../three/CameraRig';
-import { Tappable } from '../../three/common';
+import { Motes, Tappable } from '../../three/common';
+import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { WorkshopLights, WorkshopRoom } from '../../three/env/Workshop';
@@ -102,6 +103,7 @@ function Room({ onLoupe, after }: { onLoupe: () => void; after: boolean }) {
           </Tappable>
         </group>
       </group>
+      <Mouse id="mouse2" position={[0.66, 0.79, -0.3]} rotationY={-0.5} scale={0.75} />
       <MilkCat position={[1.5, 0, 0.5]} rotationY={-0.5} onTap={() => dialog.side(say('むしめがねで のぞくと、 わくわく するね！', 'wink'))} />
     </>
   );
@@ -360,6 +362,13 @@ function Micro({ acid, setAcid }: { acid: number; setAcid: (n: number) => void }
         </mesh>
       </group>
       {acid > 0 && <AcidSparkles acid={acid} />}
+      <Motes count={90} area={[12, 8, 8]} center={[0, 0, -1]} color="#ffffff" size={0.12} opacity={0.6} />
+      <SecretSpot id="calcium" position={[2.5, -2.5, 1.9]} hit={0.5}>
+        <mesh>
+          <icosahedronGeometry args={[0.2, 2]} />
+          <meshStandardMaterial color="#b38cff" emissive="#8a5cff" emissiveIntensity={0.5} roughness={0.25} />
+        </mesh>
+      </SecretSpot>
     </>
   );
 }

@@ -11,6 +11,7 @@ import { cheeseLook, curdSizeFromCuts, decideType, MARK_COLOR } from '../../game
 import type { CheeseMark, CheeseResult, CheeseType } from '../../game/types';
 import { setShot } from '../../three/CameraRig';
 import { Tappable } from '../../three/common';
+import { BirdBody, Mouse, WindowPeek } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { Vat, VAT, WorkshopLights, WorkshopRoom } from '../../three/env/Workshop';
@@ -521,6 +522,10 @@ export default function MakerScene() {
         </group>
       </group>
 
+      <Mouse id="mouse4" position={[0.2, 0, 2.6]} rotationY={-0.3} />
+      <WindowPeek id="bird" position={[-3, 2.42, -4.7]} rise={0.7}>
+        <BirdBody />
+      </WindowPeek>
       <MilkCat
         position={[-1.75, 0, 1.55]}
         rotationY={0.45}
@@ -611,7 +616,7 @@ function CutPanel({ n, size }: { n: number; size: 'big' | 'medium' | 'small' }) 
   const label = size === 'big' ? 'おおきい' : size === 'medium' ? 'ふつう' : 'ちいさい';
   const blocks = size === 'big' ? 2 : size === 'medium' ? 3 : 5;
   return (
-    <div className="panel top" style={{ top: 'calc(136px + var(--safe-t))', flexWrap: 'nowrap' }}>
+    <div className="panel top" style={{ top: 'calc(178px + var(--safe-t))', flexWrap: 'nowrap' }}>
       <div className="meter" data-testid="cutmeter" style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${blocks}, 1fr)`, gap: 2, width: 44, flex: 'none' }}>
           {Array.from({ length: blocks * blocks }, (_, i) => (

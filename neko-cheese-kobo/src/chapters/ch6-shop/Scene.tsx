@@ -10,7 +10,8 @@ import { say } from '../../game/say';
 import { useProgress } from '../../game/progress';
 import { agedLook, agingMaxDays, DEFAULT_CHEESE, formatDays, MARK_COLOR, TYPE_NAME } from '../../game/cheese';
 import { setShot } from '../../three/CameraRig';
-import { BlobShadow, Tappable } from '../../three/common';
+import { BlobShadow, Motes, Tappable } from '../../three/common';
+import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { MilkCat } from '../../three/characters/MilkCat';
@@ -25,7 +26,7 @@ const SLOT_X = [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0];
 const SHELF_Z = -1.0;
 const SHELF_Y = 0.98;
 const OVERVIEW: [THREE.Vector3Tuple, THREE.Vector3Tuple] = [
-  [0, 3.1, 7.8],
+  [0, 3.3, 9.3],
   [0, 1.2, -0.8],
 ];
 // 図鑑の ならび（まんなかは きみの チーズ）
@@ -46,11 +47,11 @@ export default function ShopScene() {
 
   useLayoutEffect(() => {
     setShot([0.6, 3.0, 8.4], OVERVIEW[1], { immediate: true, fit: 0.85 });
-    setTimeout(() => setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1, speed: 1.2 }), 100);
+    setTimeout(() => setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1.25, speed: 1.2 }), 100);
   }, []);
   useBus('cam:all', () => {
     setSel(null);
-    setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1 });
+    setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1.25 });
   });
 
   // 図鑑モード: カメラを チーズの まえへ
@@ -132,7 +133,7 @@ export default function ShopScene() {
     if (sel && sel !== 'mine') seen.current.add(sel);
     setSel(null);
     setCut(false);
-    setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1 });
+    setShot(OVERVIEW[0], OVERVIEW[1], { fit: 1.25 });
     if (dialog.isTask('inspect')) {
       const left = 3 - seen.current.size;
       dialog.setProgress(left > 0 ? `あと ${left}` : undefined);
@@ -217,6 +218,14 @@ export default function ShopScene() {
           </Spinner>
         );
       })}
+      <Mouse id="mouse6" position={[-3.55, SHELF_Y + 0.03, SHELF_Z + 0.25]} rotationY={0.5} scale={0.8} />
+      <SecretSpot id="goat" position={[3.5, SHELF_Y + 0.03, SHELF_Z + 0.2]} hit={0.4} rotationY={0.5}>
+        <mesh position-y={0.11} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.11, 0.11, 0.42, 18]} />
+          <meshStandardMaterial color="#fffdf8" roughness={0.75} />
+        </mesh>
+      </SecretSpot>
+      <Motes count={40} area={[9, 3, 5]} center={[0, 2.6, 0]} color="#fff3c8" size={0.08} opacity={0.5} />
       {/* かご */}
       {!placed && (
         <group position={[1.6, 0, 2.2]} ref={basketRef}>
@@ -394,7 +403,7 @@ function ShopRoom() {
   const floor = useMemo(() => {
     const t = woodTex('#e0b07a', '#b07a45', 'shopfloor', 8).clone();
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(4, 3);
+    t.repeat.set(10, 8);
     t.needsUpdate = true;
     return t;
   }, []);
@@ -407,8 +416,8 @@ function ShopRoom() {
       <hemisphereLight args={['#fff8ec', '#d9a066', 1.25]} />
       <directionalLight position={[3, 8, 6]} intensity={1.8} color="#fff4e0" />
       <pointLight position={[0, 3.6, 1]} intensity={10} distance={10} color="#ffe2b0" />
-      <mesh rotation-x={-Math.PI / 2}>
-        <planeGeometry args={[16, 12]} />
+      <mesh rotation-x={-Math.PI / 2} position-z={6}>
+        <planeGeometry args={[40, 30]} />
         <meshStandardMaterial map={floor} roughness={0.85} />
       </mesh>
       <mesh position={[0, 3, -3.5]}>

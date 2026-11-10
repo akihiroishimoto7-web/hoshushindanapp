@@ -50,7 +50,7 @@ export function CheeseWheel({
   // テクスチャは 形と マークごとに 1つ。色は material.color で そめる（熟成で 色が かわっても 作りなおさない）
   const mats = useMemo(() => {
     const side = new THREE.MeshStandardMaterial({
-      map: speckleTex('#ffffff', '#9a6a20', 'rind-speck', 600),
+      map: speckleTex('#ffffff', '#c9a25a', 'rind-speck2', 260),
       roughness: 0.6,
     });
     const top = new THREE.MeshStandardMaterial({

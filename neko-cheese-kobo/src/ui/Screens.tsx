@@ -6,6 +6,8 @@ import { unlockAudio } from '../audio/context';
 import { speech } from '../audio/speech';
 import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
+import { SecretBook } from './Toast';
+import { secretsOf } from '../game/secrets';
 
 function unlockAll() {
   unlockAudio();
@@ -28,7 +30,7 @@ function Stamps({ fresh }: { fresh?: number }) {
 }
 
 export function TitleScreen() {
-  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset'>(null);
+  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset' | 'secrets'>(null);
   const progress = useProgress();
   const resume = hasProgress();
   const start = (i: number) => {
@@ -72,6 +74,17 @@ export function TitleScreen() {
           >
             ⚙️ せってい
           </button>
+          <button
+            className="btn sub"
+            data-testid="secrets"
+            onClick={() => {
+              unlockAll();
+              playSfx('tap');
+              setPanel('secrets');
+            }}
+          >
+            🔍 ひみつ ずかん
+          </button>
         </div>
       </div>
       {panel === 'chapters' && (
@@ -106,6 +119,7 @@ export function TitleScreen() {
           </div>
         </div>
       )}
+      {panel === 'secrets' && <SecretBook onClose={() => setPanel(null)} />}
       {panel === 'settings' && <SettingsPanel onClose={() => setPanel(null)} onReset={() => setPanel('reset')} />}
       {panel === 'reset' && (
         <div className="screen dim" onClick={() => setPanel(null)}>
@@ -192,6 +206,7 @@ export function ChapterClear() {
       <div className="card">
         <h2>🎉 {meta.label} クリア！</h2>
         <p>「{meta.title}」の スタンプを もらったよ！</p>
+        <SecretCount chapter={chapter} />
         <Stamps fresh={chapter} />
         <div className="row">
           <button className="btn big" data-testid="next" onClick={() => game.next()}>
@@ -317,4 +332,16 @@ export function Flash() {
   const n = useGame((s) => s.flash);
   if (!n) return null;
   return <div key={n} className="flash" />;
+}
+
+function SecretCount({ chapter }: { chapter: number }) {
+  const found = useProgress((s) => s.secrets);
+  const all = secretsOf(chapter);
+  const got = all.filter((s) => found.includes(s.id));
+  return (
+    <p style={{ fontSize: 16, background: '#fff', borderRadius: 16, padding: '6px 12px' }}>
+      🔍 ひみつ {got.length} / {all.length}
+      {got.length < all.length ? '　まだ かくれているよ。 もういちど さがしてみてね！' : '　ぜんぶ みつけた！ すごい！'}
+    </p>
+  );
 }
