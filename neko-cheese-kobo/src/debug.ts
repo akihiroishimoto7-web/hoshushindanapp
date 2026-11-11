@@ -3,6 +3,7 @@ import { dialog, useDialog } from './game/dialog';
 import { useProgress } from './game/progress';
 import { listTargets, screenPosOf, threeRef } from './three/targets';
 import { bus } from './game/bus';
+import { audioDebug } from './audio/context';
 
 /** ?debug をつけて開くと、ブラウザのコンソール・自動テストから操作できる */
 export function installDebug() {
@@ -17,6 +18,7 @@ export function installDebug() {
     }),
     targets: listTargets,
     screenPos: screenPosOf,
+    audio: audioDebug,
     perf: () => ({ calls: threeRef.calls, tris: threeRef.tris, geos: threeRef.geos, texs: threeRef.texs, width: threeRef.width, height: threeRef.height }),
     three: threeRef,
   };
