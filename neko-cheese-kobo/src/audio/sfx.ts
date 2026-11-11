@@ -157,7 +157,9 @@ const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5];
 export function playSfx(name: SfxName) {
   if (!useProgress.getState().settings.sound) return;
   const a = getAudio();
-  if (!a || a.ctx.state !== 'running') return;
+  if (!a) return;
+  // 再開まちでも 予約しておけば、再開した 瞬間に 鳴る（タップ直後の 音が 消えないように）
+  if (a.ctx.state !== 'running') void a.ctx.resume().catch(() => {});
   switch (name) {
     case 'tap':
       tone(a, 'sine', 880, 620, 0.08, 0.18);
