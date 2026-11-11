@@ -1,6 +1,7 @@
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { withRim } from '../look';
 import { textTex } from '../tex';
 import { makeDisc, VAT } from '../env/Workshop';
 import { BlobShadow } from '../common';
@@ -62,7 +63,8 @@ export function VatSurface({
   const geo = useMemo(() => makeDisc(VAT.r - 0.02, 22, 56), []);
   const base = useMemo(() => Float32Array.from(geo.attributes.position.array as Float32Array), [geo]);
   const mat = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: '#fffdf6', roughness: 0.2, emissive: '#fff4dc', emissiveIntensity: 0.1, clearcoat: 1, clearcoatRoughness: 0.08 }),
+    () =>
+      withRim(new THREE.MeshPhysicalMaterial({ color: '#fffdf6', roughness: 0.2, emissive: '#fff4dc', emissiveIntensity: 0.22, clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.5, sheenColor: new THREE.Color('#dfeaff') }), '#e2ecff', 0.35, 2.4),
     [],
   );
   const milkC = useMemo(() => new THREE.Color('#fffdf6'), []);

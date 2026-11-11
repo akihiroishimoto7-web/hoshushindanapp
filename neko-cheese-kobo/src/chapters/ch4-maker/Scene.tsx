@@ -423,7 +423,7 @@ export default function MakerScene() {
         {/* ホエイ */}
         <mesh ref={wheyMesh} rotation-x={-Math.PI / 2} visible={false}>
           <circleGeometry args={[VAT.r - 0.02, 48]} />
-          <meshStandardMaterial color={WHEY} transparent opacity={0.82} roughness={0.15} />
+          <meshPhysicalMaterial color="#d6d46e" emissive="#6b6a20" emissiveIntensity={0.15} transparent opacity={0.86} roughness={0.05} clearcoat={1} clearcoatRoughness={0.03} ior={1.34} specularIntensity={1} depthWrite={false} />
         </mesh>
         {stage !== 'whole' && (
           <instancedMesh ref={cubeMesh} args={[undefined, undefined, cubes.length]} material={curdMat} frustumCulled={false} key={cubes.length}>

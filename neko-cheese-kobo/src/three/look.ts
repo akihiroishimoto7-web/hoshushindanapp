@@ -43,3 +43,31 @@ export function unlitMat() {
   if (!unlit) unlit = new THREE.MeshBasicMaterial({ vertexColors: true });
   return unlit;
 }
+
+/**
+ * ふちほど 不透明で 明るく、まんなかほど すける（フレネル）。
+ * 顕微鏡で 見た つぶや、液体の ふちの 見え方を まねる。
+ */
+export function withFresnelAlpha<T extends THREE.MeshStandardMaterial>(m: T, inner = 0.25, edge = 0.95, power = 2.2, edgeGlow = 0.25, glowColor: THREE.ColorRepresentation = '#ffffff'): T {
+  const gc = new THREE.Color(glowColor);
+  m.transparent = true;
+  m.depthWrite = false;
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.fInner = { value: inner };
+    sh.uniforms.fEdge = { value: edge };
+    sh.uniforms.fPow = { value: power };
+    sh.uniforms.fGlow = { value: edgeGlow };
+    sh.uniforms.fGlowC = { value: gc };
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float fInner;\nuniform float fEdge;\nuniform float fPow;\nuniform float fGlow;\nuniform vec3 fGlowC;')
+      .replace(
+        '#include <opaque_fragment>',
+        `float fr = pow(1.0 - saturate(abs(dot(normal, normalize(vViewPosition)))), fPow);
+         outgoingLight += fGlowC * fr * fGlow;
+         diffuseColor.a *= mix(fInner, fEdge, fr);
+         #include <opaque_fragment>`,
+      );
+  };
+  m.customProgramCacheKey = () => `fa:${inner}:${edge}:${power}:${edgeGlow}:${gc.getHexString()}`;
+  return m;
+}

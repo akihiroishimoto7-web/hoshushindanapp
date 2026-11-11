@@ -9,6 +9,7 @@ import { game } from '../../game/game';
 import { say } from '../../game/say';
 import { setShot } from '../../three/CameraRig';
 import { Motes, Tappable } from '../../three/common';
+import { withFresnelAlpha } from '../../three/look';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -23,6 +24,24 @@ import { parseRuby } from '../../game/ruby';
 import { RubyText } from '../../ui/RubyText';
 
 const FEEDS = 8;
+
+// 顕微鏡で 見たような 脂肪球: なかは あわく すけ、ふちの 膜が ひかる
+const fatCore = withFresnelAlpha(
+  new THREE.MeshPhysicalMaterial({ color: '#ffdf8a', roughness: 0.22, clearcoat: 0.6, emissive: '#ffd970', emissiveIntensity: 0.18 }),
+  0.82,
+  0.98,
+  1.8,
+  0.12,
+  '#fff3c8',
+);
+const fatSkin = withFresnelAlpha(
+  new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.05, iridescence: 0.6, iridescenceIOR: 1.3 }),
+  0.03,
+  0.85,
+  3.0,
+  0.55,
+  '#fff8e8',
+);
 
 export default function MicroScene() {
   useChapterStart(script);
@@ -282,8 +301,9 @@ function Micro({ acid, setAcid }: { acid: number; setAcid: (n: number) => void }
   const firstSugar = sugars.current[3].home;
   return (
     <>
-      <color attach="background" args={['#e6ecff']} />
-      <fogExp2 attach="fog" args={['#e9eeff', 0.045]} />
+      <color attach="background" args={['#c6d3ec']} />
+      <fogExp2 attach="fog" args={['#cbd7ee', 0.05]} />
+      <MicroBackdrop />
       <hemisphereLight args={['#ffffff', '#ffe9c4', 1.6]} />
       <directionalLight position={[3, 6, 8]} intensity={1.6} color="#fff6e0" />
       <pointLight position={[0, 0, 5]} intensity={8} distance={14} color="#fff0d8" />
@@ -298,13 +318,13 @@ function Micro({ acid, setAcid }: { acid: number; setAcid: (n: number) => void }
               else dialog.side(say('あぶらの つぶ。 ぷかぷか ふわふわ。'));
             }}
           >
-            <mesh>
-              <sphereGeometry args={[f.r, 32, 24]} />
-              <meshStandardMaterial color="#fff3c8" roughness={0.12} emissive="#ffd970" emissiveIntensity={0.12} />
+            {/* なかみ（あぶら）: うっすら きいろく すける */}
+            <mesh material={fatCore} renderOrder={2}>
+              <sphereGeometry args={[f.r * 0.97, 36, 28]} />
             </mesh>
-            <mesh scale={1.04}>
-              <sphereGeometry args={[f.r, 24, 16]} />
-              <meshStandardMaterial color="#ffffff" transparent opacity={0.25} roughness={0.05} depthWrite={false} />
+            {/* まく: ふちが ひかる うすい 膜 */}
+            <mesh material={fatSkin} renderOrder={3}>
+              <sphereGeometry args={[f.r, 36, 28]} />
             </mesh>
           </Tappable>
         </group>
@@ -432,5 +452,34 @@ function AcidMeter({ acid }: { acid: number }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** うしろに ぼんやり 見える たくさんの つぶ（ピントの あわない 奥行き） */
+function MicroBackdrop() {
+  const mat = useMemo(
+    () => withFresnelAlpha(new THREE.MeshStandardMaterial({ color: '#fff8e8', roughness: 0.3 }), 0.08, 0.5, 2, 0.35, '#ffffff'),
+    [],
+  );
+  const ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const m = ref.current;
+    if (!m) return;
+    const o = new THREE.Object3D();
+    for (let i = 0; i < 46; i++) {
+      o.position.set((Math.random() - 0.5) * 34, (Math.random() - 0.5) * 22, -9 - Math.random() * 14);
+      o.scale.setScalar(0.6 + Math.random() * 2.2);
+      o.updateMatrix();
+      m.setMatrixAt(i, o.matrix);
+    }
+    m.instanceMatrix.needsUpdate = true;
+  }, []);
+  useFrame((st) => {
+    if (ref.current) ref.current.rotation.z = Math.sin(st.clock.elapsedTime * 0.05) * 0.05;
+  });
+  return (
+    <instancedMesh ref={ref} args={[undefined, mat, 46]} frustumCulled={false} renderOrder={1}>
+      <sphereGeometry args={[1, 20, 14]} />
+    </instancedMesh>
   );
 }

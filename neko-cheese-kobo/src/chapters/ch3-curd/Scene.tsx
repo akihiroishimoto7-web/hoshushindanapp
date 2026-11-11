@@ -116,6 +116,8 @@ export default function CurdScene() {
   useFrame((st, dt0) => {
     const dt = Math.min(dt0, 0.05);
     clock.current = st.clock.elapsedTime;
+    // 注ぎおわっても 目標の 高さまで かならず たまる（重い 端末で コマ落ちしても）
+    if (poured && !pouring && level.current < 0.78) level.current = Math.min(0.78, level.current + dt * 0.6);
     if (pouring) {
       level.current = Math.min(0.78, level.current + dt * 0.45);
       const sy = VAT.bottom + 0.05 + level.current * (VAT.top - VAT.bottom - 0.2);
