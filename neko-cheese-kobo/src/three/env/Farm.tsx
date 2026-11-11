@@ -3,6 +3,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { Environment, Lightformer } from '@react-three/drei';
 import { SunShadow } from '../realism';
+import { GrassField, groundDetailTex, RealTrees, SoftClouds } from '../nature';
 import { rng, textTex, woodTex } from '../tex';
 import { BlobShadow } from '../common';
 
@@ -64,7 +65,7 @@ export function Ground({ path = [], onTap }: { path?: [number, number][]; onTap?
   }, [path]);
   return (
     <mesh geometry={geo} onClick={onTap} name="ground">
-      <meshLambertMaterial vertexColors />
+      <meshStandardMaterial vertexColors map={groundDetailTex()} roughness={1} />
     </mesh>
   );
 }
@@ -91,43 +92,11 @@ function mtx(x: number, y: number, z: number, s: number | THREE.Vector3Tuple = 1
   return _o.matrix.clone();
 }
 
-/** 草のたば */
-export function Grass({ count = 520, avoid = [], seed = 1 }: { count?: number; avoid?: [number, number, number][]; seed?: number }) {
-  const ref = useRef<THREE.InstancedMesh>(null);
-  const geo = useMemo(() => {
-    const parts = [0, 1, 2].map((i) => {
-      const c = new THREE.ConeGeometry(0.07, 0.45, 3);
-      c.translate(0, 0.22, 0);
-      c.rotateZ((i - 1) * 0.35);
-      c.rotateY(i * 2.1);
-      return c;
-    });
-    const merged = mergeSimple(parts);
-    parts.forEach((p) => p.dispose());
-    return merged;
-  }, []);
-  const { mats, colors } = useMemo(() => {
-    const r = rng(seed);
-    const mats: THREE.Matrix4[] = [];
-    const colors: THREE.Color[] = [];
-    let guard = 0;
-    while (mats.length < count && guard++ < count * 5) {
-      const a = r() * Math.PI * 2;
-      const d = Math.sqrt(r()) * 32;
-      const x = Math.cos(a) * d;
-      const z = Math.sin(a) * d;
-      if (avoid.some(([ax, az, ar]) => Math.hypot(x - ax, z - az) < ar)) continue;
-      mats.push(mtx(x, groundHeight(x, z), z, 0.8 + r() * 0.9, r() * 6));
-      colors.push(new THREE.Color().setHSL(0.26 + r() * 0.06, 0.55, 0.38 + r() * 0.15));
-    }
-    return { mats, colors };
-  }, [count, avoid, seed]);
-  useInstances(ref, mats, colors);
-  return (
-    <instancedMesh ref={ref} args={[geo, undefined, mats.length]} frustumCulled={false}>
-      <meshLambertMaterial />
-    </instancedMesh>
-  );
+/** 草原（1本ずつの 葉が 風に ゆれる）。count は 以前の「たば」の数 なので 葉の本数に 換算する */
+export function Grass({ count = 520, avoid = [], seed = 1, path = [] }: { count?: number; avoid?: [number, number, number][]; seed?: number; path?: [number, number][] }) {
+  const pv = useMemo(() => path.map(([x, z]) => new THREE.Vector2(x, z)), [path]);
+  const keepOut = useMemo(() => (pv.length > 1 ? (x: number, z: number) => distToPath(x, z, pv) < 0.95 : undefined), [pv]);
+  return <GrassField count={Math.round(count * 20)} height={groundHeight} avoid={avoid} keepOut={keepOut} seed={seed} />;
 }
 
 /** 花 */
@@ -195,79 +164,12 @@ export function Flowers({ count = 90, avoid = [], seed = 5, onTap }: { count?: n
 
 /** 木 */
 export function Trees({ spots }: { spots: [number, number, number][] }) {
-  const trunk = useRef<THREE.InstancedMesh>(null);
-  const leaves = useRef<THREE.InstancedMesh>(null);
-  const { tm, lm, lc } = useMemo(() => {
-    const r = rng(9);
-    const tm: THREE.Matrix4[] = [];
-    const lm: THREE.Matrix4[] = [];
-    const lc: THREE.Color[] = [];
-    spots.forEach(([x, z, s]) => {
-      const y = groundHeight(x, z);
-      tm.push(mtx(x, y + 0.9 * s, z, [s, s, s]));
-      const blobs = 3;
-      for (let k = 0; k < blobs; k++) {
-        const a = (k / blobs) * Math.PI * 2 + r();
-        lm.push(mtx(x + Math.cos(a) * 0.5 * s, y + (2.2 + r() * 0.6) * s, z + Math.sin(a) * 0.5 * s, (0.95 + r() * 0.3) * s, r() * 6));
-        lc.push(new THREE.Color().setHSL(0.27 + r() * 0.06, 0.5, 0.36 + r() * 0.1));
-      }
-      lm.push(mtx(x, y + 2.9 * s, z, 0.9 * s));
-      lc.push(new THREE.Color().setHSL(0.28, 0.55, 0.45));
-    });
-    return { tm, lm, lc };
-  }, [spots]);
-  useInstances(trunk, tm);
-  useInstances(leaves, lm, lc);
-  return (
-    <group>
-      <instancedMesh ref={trunk} args={[undefined, undefined, tm.length]} frustumCulled={false}>
-        <cylinderGeometry args={[0.16, 0.24, 1.8, 7]} />
-        <meshLambertMaterial color="#8c5b32" />
-      </instancedMesh>
-      <instancedMesh ref={leaves} args={[undefined, undefined, lm.length]} frustumCulled={false}>
-        <icosahedronGeometry args={[0.95, 1]} />
-        <meshLambertMaterial />
-      </instancedMesh>
-      {spots.map(([x, z, s], i) => (
-        <group key={i} position={[x, groundHeight(x, z), z]}>
-          <BlobShadow size={2.4 * s} opacity={0.18} />
-        </group>
-      ))}
-    </group>
-  );
+  return <RealTrees spots={spots} height={groundHeight} />;
 }
 
 /** ゆっくり流れる雲 */
 export function Clouds() {
-  const ref = useRef<THREE.InstancedMesh>(null);
-  const g = useRef<THREE.Group>(null);
-  const mats = useMemo(() => {
-    const r = rng(77);
-    const out: THREE.Matrix4[] = [];
-    for (let c = 0; c < 8; c++) {
-      const a = (c / 8) * Math.PI * 2 + r();
-      const d = 45 + r() * 25;
-      const x = Math.cos(a) * d;
-      const z = Math.sin(a) * d;
-      const y = 22 + r() * 10;
-      for (let k = 0; k < 5; k++) {
-        out.push(mtx(x + (k - 2) * 2.2, y + Math.sin(k) * 0.8, z + (r() - 0.5) * 2, 2 + r() * 1.6 + (k === 2 ? 1 : 0)));
-      }
-    }
-    return out;
-  }, []);
-  useInstances(ref, mats);
-  useFrame((_, dt) => {
-    if (g.current) g.current.rotation.y += dt * 0.006;
-  });
-  return (
-    <group ref={g}>
-      <instancedMesh ref={ref} args={[undefined, undefined, mats.length]} frustumCulled={false}>
-        <sphereGeometry args={[1, 12, 8]} />
-        <meshLambertMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.25} fog={false} />
-      </instancedMesh>
-    </group>
-  );
+  return <SoftClouds />;
 }
 
 /** 木の柵 */

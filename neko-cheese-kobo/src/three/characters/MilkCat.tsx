@@ -7,6 +7,7 @@ import { tabbyTex } from '../tex';
 import { BlobShadow, HitArea } from '../common';
 import { bake, G, type Part } from '../bake';
 import { bakedMat, unlitMat, withRim } from '../look';
+import { FurShells } from '../fur';
 import { fx } from '../fx';
 import { playSfx } from '../../audio/sfx';
 
@@ -201,6 +202,8 @@ export interface MilkCatProps {
   scarf?: string;
   /** true: 会話システム（useCat）の表情・口パクにしたがう */
   controlled?: boolean;
+  /** ほんものの毛のような ふわふわ（主役の ミルクだけ。おきゃくさんは 軽い表示） */
+  fur?: boolean;
   /** NPC の固定表情 */
   face?: Emotion;
   /** しゃべるときに カメラの方を向く */
@@ -229,9 +232,11 @@ export function MilkCat({
   scale = 1,
   groupRef,
   shadow = true,
+  fur: furProp,
   onTap,
   seed = 0,
 }: MilkCatProps) {
+  const fur = furProp ?? controlled;
   const A = getAssets(variant, scarf, apron);
   const own = useRef<THREE.Group>(null);
   const root = groupRef ?? own;
@@ -610,21 +615,33 @@ export function MilkCat({
       <group ref={turn}>
         <group ref={body}>
           {/* 脚 */}
-          <mesh ref={legL} geometry={A.leg} material={bakedMat(0.95, 0.35)} position={[0.12, 0.2, 0]} />
-          <mesh ref={legR} geometry={A.leg} material={bakedMat(0.95, 0.35)} position={[-0.12, 0.2, 0]} />
+          <mesh ref={legL} geometry={A.leg} material={bakedMat(0.95, 0.35)} position={[0.12, 0.2, 0]}>
+            {fur && <FurShells id="leg" geometry={A.leg} base={bakedMat(0.95, 0.35)} layers={5} length={0.02} density={80} />}
+          </mesh>
+          <mesh ref={legR} geometry={A.leg} material={bakedMat(0.95, 0.35)} position={[-0.12, 0.2, 0]}>
+            {fur && <FurShells id="leg" geometry={A.leg} base={bakedMat(0.95, 0.35)} layers={5} length={0.02} density={80} />}
+          </mesh>
           {/* 胴 */}
-          <mesh ref={torso} geometry={A.torso} material={A.fur} position-y={0.42} scale={[1, 1.1, 0.92]} />
+          <mesh ref={torso} geometry={A.torso} material={A.fur} position-y={0.42} scale={[1, 1.1, 0.92]}>
+            {fur && <FurShells id={'torso-' + variant} geometry={A.torso} base={A.fur} layers={8} length={0.03} density={150} />}
+          </mesh>
           <mesh geometry={A.deco} material={bakedMat(0.8, 0.3)} />
           {/* 腕 */}
-          <mesh ref={armL} geometry={A.arm} material={bakedMat(0.95, 0.35)} position={[0.27, 0.62, 0.02]} />
-          <mesh ref={armR} geometry={A.arm} material={bakedMat(0.95, 0.35)} position={[-0.27, 0.62, 0.02]} />
+          <mesh ref={armL} geometry={A.arm} material={bakedMat(0.95, 0.35)} position={[0.27, 0.62, 0.02]}>
+            {fur && <FurShells id="arm" geometry={A.arm} base={bakedMat(0.95, 0.35)} layers={5} length={0.02} density={80} />}
+          </mesh>
+          <mesh ref={armR} geometry={A.arm} material={bakedMat(0.95, 0.35)} position={[-0.27, 0.62, 0.02]}>
+            {fur && <FurShells id="arm" geometry={A.arm} base={bakedMat(0.95, 0.35)} layers={5} length={0.02} density={80} />}
+          </mesh>
           {/* しっぽ */}
           <group ref={tailRoot} position={[0, 0.24, -0.25]}>
             <TailChain n={6} a={A} refs={tail} />
           </group>
           {/* 頭 */}
           <group ref={head} position-y={0.74}>
-            <mesh geometry={A.head} material={A.fur} position-y={0.27} scale={[1.14, 0.96, 1]} />
+            <mesh geometry={A.head} material={A.fur} position-y={0.27} scale={[1.14, 0.96, 1]}>
+              {fur && <FurShells id={'head-' + variant} geometry={A.head} base={A.fur} layers={8} length={0.03} density={170} faceMask />}
+            </mesh>
             <mesh geometry={A.face} material={bakedMat(0.95, 0.35)} />
             <mesh ref={mouthClosed} geometry={A.mouthClosed} material={unlitMat()} />
             <mesh ref={mouthOpen} geometry={A.mouthOpen} material={unlitMat()} position={[0, 0.125, 0.372]} visible={false} />

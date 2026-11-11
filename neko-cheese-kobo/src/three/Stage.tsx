@@ -22,8 +22,8 @@ export function Stage({ children, onLost }: { children: ReactNode; onLost?: () =
       gl={{ antialias: true, alpha: false, stencil: false, powerPreference: 'default' }}
       camera={{ fov: 45, near: 0.1, far: 320, position: [0, 5, 10], manual: true }}
       onCreated={({ gl }) => {
-        gl.toneMapping = THREE.NeutralToneMapping;
-        gl.toneMappingExposure = 1.05;
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.12;
         gl.setClearColor('#fff6dc');
         gl.domElement.addEventListener('webglcontextlost', (e) => {
           e.preventDefault();
