@@ -8,6 +8,7 @@ import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
 import { SecretBook } from './Toast';
 import { secretsOf } from '../game/secrets';
+import { isUnlocked, OUTFITS, outfitForChapter } from '../game/outfits';
 
 function unlockAll() {
   unlockAudio();
@@ -30,7 +31,7 @@ function Stamps({ fresh }: { fresh?: number }) {
 }
 
 export function TitleScreen() {
-  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset' | 'secrets'>(null);
+  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset' | 'secrets' | 'outfit'>(null);
   const progress = useProgress();
   const resume = hasProgress();
   const start = (i: number) => {
@@ -85,6 +86,17 @@ export function TitleScreen() {
           >
             🔍 ひみつ ずかん
           </button>
+          <button
+            className="btn pink"
+            data-testid="outfit"
+            onClick={() => {
+              unlockAll();
+              playSfx('ting');
+              setPanel('outfit');
+            }}
+          >
+            🎀 きせかえ
+          </button>
         </div>
       </div>
       {panel === 'chapters' && (
@@ -120,6 +132,7 @@ export function TitleScreen() {
         </div>
       )}
       {panel === 'secrets' && <SecretBook onClose={() => setPanel(null)} />}
+      {panel === 'outfit' && <OutfitPanel onClose={() => setPanel(null)} />}
       {panel === 'settings' && <SettingsPanel onClose={() => setPanel(null)} onReset={() => setPanel('reset')} />}
       {panel === 'reset' && (
         <div className="screen dim" onClick={() => setPanel(null)}>
@@ -198,14 +211,37 @@ export function ChapterClear() {
   const meta = CHAPTERS[chapter];
   useEffect(() => {
     const t = setTimeout(() => playSfx('stamp'), 250);
-    return () => clearTimeout(t);
+    const t2 = setTimeout(() => playSfx('yay'), 1200);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
   }, []);
+  const gift = outfitForChapter(chapter);
   return (
     <div className="screen dim" data-testid="clear">
       <Confetti n={28} />
       <div className="card">
         <h2>🎉 {meta.label} クリア！</h2>
         <p>「{meta.title}」の スタンプを もらったよ！</p>
+        {gift && (
+          <div className="gift">
+            <span className="ic">{gift.icon}</span>
+            <span>
+              <small>ミルクの きせかえ ゲット！</small>
+              <b>{gift.name}</b>
+            </span>
+            <button
+              className="btn pink"
+              onClick={() => {
+                useProgress.getState().setOutfit(gift.id);
+                playSfx('magic');
+              }}
+            >
+              きせる
+            </button>
+          </div>
+        )}
         <SecretCount chapter={chapter} />
         <Stamps fresh={chapter} />
         <div className="row">
@@ -360,6 +396,46 @@ export function ChapterCard() {
         <span className="em">{m.stamp}</span>
         <small>{m.label}</small>
         <b>{m.title}</b>
+      </div>
+    </div>
+  );
+}
+
+/** ミルクの きせかえ（タイトルの ミルクが その場で きがえる） */
+function OutfitPanel({ onClose }: { onClose: () => void }) {
+  const stamps = useProgress((s) => s.stamps);
+  const outfit = useProgress((s) => s.outfit);
+  const setOutfit = useProgress((s) => s.setOutfit);
+  return (
+    <div className="screen outfit-screen" onClick={onClose}>
+      <div className="card outfit-card" onClick={(e) => e.stopPropagation()}>
+        <h2>🎀 ミルクの きせかえ</h2>
+        <p style={{ fontSize: 15 }}>おはなしを クリアすると、 あたらしい きせかえが もらえるよ。</p>
+        <div className="outfits">
+          {OUTFITS.map((o) => {
+            const open = isUnlocked(o, stamps);
+            return (
+              <button
+                key={o.id}
+                className={`outfit ${outfit === o.id ? 'on' : ''}`}
+                disabled={!open}
+                data-testid={'outfit-' + o.id}
+                onClick={() => {
+                  setOutfit(o.id);
+                  playSfx(o.id === 'none' ? 'pop' : 'magic');
+                }}
+              >
+                <span className="ic">{open ? o.icon : '🔒'}</span>
+                <small>{open ? o.name : `${o.chapter + 1}しょうで ゲット`}</small>
+              </button>
+            );
+          })}
+        </div>
+        <div className="row">
+          <button className="btn" onClick={onClose}>
+            これで いく！
+          </button>
+        </div>
       </div>
     </div>
   );

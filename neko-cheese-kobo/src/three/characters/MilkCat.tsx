@@ -8,6 +8,8 @@ import { BlobShadow, HitArea } from '../common';
 import { bake, G, type Part } from '../bake';
 import { bakedMat, unlitMat, withRim } from '../look';
 import { FurShells } from '../fur';
+import { BodyOutfit, HeadOutfit } from './Outfit';
+import { useProgress } from '../../game/progress';
 import { fx } from '../fx';
 import { playSfx } from '../../audio/sfx';
 
@@ -202,6 +204,8 @@ export interface MilkCatProps {
   scarf?: string;
   /** true: 会話システム（useCat）の表情・口パクにしたがう */
   controlled?: boolean;
+  /** きせかえ（ふだんは 保存された ものを 使う） */
+  outfit?: string;
   /** ほんものの毛のような ふわふわ（主役の ミルクだけ。おきゃくさんは 軽い表示） */
   fur?: boolean;
   /** NPC の固定表情 */
@@ -233,10 +237,13 @@ export function MilkCat({
   groupRef,
   shadow = true,
   fur: furProp,
+  outfit: outfitProp,
   onTap,
   seed = 0,
 }: MilkCatProps) {
   const fur = furProp ?? controlled;
+  const savedOutfit = useProgress((p) => p.outfit);
+  const outfit = outfitProp ?? (controlled ? savedOutfit : 'none');
   const A = getAssets(variant, scarf, apron);
   const own = useRef<THREE.Group>(null);
   const root = groupRef ?? own;
@@ -582,6 +589,23 @@ export function MilkCat({
     }
   });
 
+  // なでなで: 押したまま 指を うごかすと ごろごろ ハート
+  const pet = useRef({ down: false, dist: 0, last: null as null | { x: number; y: number }, at: -10 });
+  const onPetMove = (x: number, y: number, point: THREE.Vector3) => {
+    const p = pet.current;
+    if (!p.down) return;
+    if (p.last) p.dist += Math.hypot(x - p.last.x, y - p.last.y);
+    p.last = { x, y };
+    const now = performance.now() / 1000;
+    if (p.dist > 90 && now - p.at > 1.1) {
+      p.dist = 0;
+      p.at = now;
+      st.current.wantReact = 'purr';
+      playSfx('purr');
+      fx.hearts([point.x, point.y + 0.3, point.z], 5);
+    }
+  };
+
   const react = () => {
     const s = st.current;
     const r = REACTIONS[Math.floor(s.react++) % REACTIONS.length];
@@ -609,6 +633,25 @@ export function MilkCat({
             }
           : undefined
       }
+      onPointerDown={
+        onTap
+          ? (e) => {
+              pet.current.down = true;
+              pet.current.dist = 0;
+              pet.current.last = { x: e.clientX, y: e.clientY };
+              (e.target as unknown as Element).setPointerCapture?.(e.pointerId);
+            }
+          : undefined
+      }
+      onPointerMove={onTap ? (e) => onPetMove(e.clientX, e.clientY, e.point) : undefined}
+      onPointerUp={
+        onTap
+          ? () => {
+              pet.current.down = false;
+              pet.current.last = null;
+            }
+          : undefined
+      }
     >
       {shadow && <BlobShadow size={0.95} />}
       {onTap && <HitArea r={0.62} position={[0, 0.75, 0]} />}
@@ -626,6 +669,7 @@ export function MilkCat({
             {fur && <FurShells id={'torso-' + variant} geometry={A.torso} base={A.fur} layers={8} length={0.03} density={150} />}
           </mesh>
           <mesh geometry={A.deco} material={bakedMat(0.8, 0.3)} />
+          <BodyOutfit id={outfit} />
           {/* 腕 */}
           <mesh ref={armL} geometry={A.arm} material={bakedMat(0.95, 0.35)} position={[0.27, 0.62, 0.02]}>
             {fur && <FurShells id="arm" geometry={A.arm} base={bakedMat(0.95, 0.35)} layers={5} length={0.02} density={80} />}
@@ -657,6 +701,7 @@ export function MilkCat({
             <mesh ref={earR} geometry={A.ear} material={bakedMat(0.95, 0.35)} position={[-0.27, 0.47, 0.03]} rotation-z={0.38} scale={1.12} />
             {/* あせ */}
             <mesh ref={sweat} geometry={sweatGeo} material={sweatMat} position={[0.38, 0.46, 0.14]} visible={false} scale={[1, 1.4, 1]} />
+            <HeadOutfit id={outfit} hat={hat} />
             {/* コック帽 */}
             {hat && (
               <group ref={hatG} position={[0.02, 0.6, -0.06]} rotation={[-0.14, 0, 0.1]} scale={0.84}>

@@ -22,6 +22,8 @@ interface SaveData {
   settings: Settings;
   /** みつけた「ひみつ」の id（あとから 足した項目。古い保存データには ない） */
   secrets: string[];
+  /** ミルクの きせかえ（あとから 足した項目） */
+  outfit: string;
 }
 
 interface ProgressState extends SaveData {
@@ -31,6 +33,7 @@ interface ProgressState extends SaveData {
   patchCheese: (c: Partial<CheeseResult>) => void;
   setSetting: (k: keyof Settings, v: boolean) => void;
   addSecret: (id: string) => boolean;
+  setOutfit: (id: string) => void;
   reset: () => void;
 }
 
@@ -42,6 +45,7 @@ const defaults: SaveData = {
   finished: false,
   settings: { voice: true, sound: true, music: true },
   secrets: [],
+  outfit: 'none',
 };
 
 function load(): SaveData {
@@ -58,6 +62,7 @@ function load(): SaveData {
       finished: Boolean(d.finished),
       settings: { ...defaults.settings, ...(d.settings ?? {}) },
       secrets: Array.isArray(d.secrets) ? d.secrets.filter((x) => typeof x === 'string') : [],
+      outfit: typeof d.outfit === 'string' ? d.outfit : 'none',
     };
   } catch {
     return structuredClone(defaults);
@@ -78,6 +83,7 @@ function save(s: SaveData) {
       finished: s.finished,
       settings: s.settings,
       secrets: s.secrets,
+      outfit: s.outfit,
     };
     localStorage.setItem(KEY, JSON.stringify(data));
   } catch {
@@ -106,6 +112,7 @@ export const useProgress = create<ProgressState>((set, get) => ({
     if (cur) set({ cheese: { ...cur, ...c } });
   },
   setSetting: (k, v) => set({ settings: { ...get().settings, [k]: v } }),
+  setOutfit: (id) => set({ outfit: id }),
   addSecret: (id) => {
     const cur = get().secrets;
     if (cur.includes(id)) return false;
