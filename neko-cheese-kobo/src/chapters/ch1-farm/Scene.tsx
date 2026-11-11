@@ -280,7 +280,7 @@ export default function FarmScene() {
         <Clover />
       </SecretSpot>
       <Ground path={PATH} onTap={onGround} />
-      <Grass avoid={AVOID} count={700} />
+      <Grass avoid={AVOID} count={700} path={PATH} />
       <Flowers
         count={130}
         avoid={AVOID}
