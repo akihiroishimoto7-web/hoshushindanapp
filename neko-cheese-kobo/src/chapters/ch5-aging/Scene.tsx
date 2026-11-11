@@ -17,8 +17,8 @@ import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
 import { MilkCat } from '../../three/characters/MilkCat';
 import { Table } from '../../three/props/Kitchen';
-import { CheeseWheel, Mozzarella } from '../../three/props/Cheese';
-import { rng, stoneTex, textTex, woodTex } from '../../three/tex';
+import { CheeseWheel, Mozzarella, roundedWheel } from '../../three/props/Cheese';
+import { rindTex, rng, stoneTex, textTex, woodTex } from '../../three/tex';
 import { playSfx } from '../../audio/sfx';
 import { ui } from '../../ui/tunnel';
 import { Dial } from '../../ui/Dial';
@@ -446,8 +446,8 @@ function Cellar() {
         <meshStandardMaterial color="#8c5b32" roughness={0.85} />
       </instancedMesh>
       <instancedMesh ref={wheels} args={[undefined, undefined, data.w.length]} frustumCulled={false}>
-        <cylinderGeometry args={[0.38, 0.38, 0.34, 20]} />
-        <meshStandardMaterial roughness={0.7} />
+        <primitive object={roundedWheel(0.38, 0.34, 24)} attach="geometry" />
+        <meshStandardMaterial map={rindTex('natural')} roughness={0.8} />
       </instancedMesh>
     </group>
   );

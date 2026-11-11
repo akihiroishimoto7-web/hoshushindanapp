@@ -515,18 +515,39 @@ export function drawMark(g: CanvasRenderingContext2D, mark: string, cx: number, 
 
 /** チーズの うえの 「きみの マーク」 */
 export function cheeseTopTex(base: string, mark: string | null, markColor: string, key: string) {
-  return make(key, 256, 256, (g, w, h) => {
+  return make(key, 512, 512, (g, w, h) => {
     g.fillStyle = base;
     g.fillRect(0, 0, w, h);
     const r = rng(key.length * 7);
-    for (let i = 0; i < 260; i++) {
-      g.fillStyle = `rgba(160,110,30,${r() * 0.12})`;
+    for (let i = 0; i < 60; i++) {
+      const x = r() * w;
+      const y = r() * h;
+      const rad = 20 + r() * 80;
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+      gr.addColorStop(0, `rgba(${r() < 0.5 ? '255,255,255' : '120,110,95'},${0.08 + r() * 0.1})`);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr;
+      g.fillRect(0, 0, w, h);
+    }
+    for (let i = 0; i < 1600; i++) {
+      g.fillStyle = r() < 0.6 ? `rgba(80,65,40,${0.08 + r() * 0.2})` : `rgba(255,255,240,${0.15 + r() * 0.25})`;
       g.beginPath();
-      g.arc(r() * w, r() * h, r() * 2.2, 0, Math.PI * 2);
+      g.arc(r() * w, r() * h, 0.5 + r() * 1.5, 0, Math.PI * 2);
       g.fill();
     }
+    // ふちの まわりは すこし こい（かわが あつい）
+    const edge = g.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.5);
+    edge.addColorStop(0, 'rgba(0,0,0,0)');
+    edge.addColorStop(1, 'rgba(90,70,40,0.25)');
+    g.fillStyle = edge;
+    g.fillRect(0, 0, w, h);
     if (mark) {
-      g.globalAlpha = 0.85;
+      // 押した 刻印（かげ と ハイライトで へこんで 見える）
+      g.globalAlpha = 0.5;
+      drawMark(g, mark, w / 2 + 3, h / 2 + 3, w * 0.5, '#5a3a14');
+      g.globalAlpha = 0.6;
+      drawMark(g, mark, w / 2 - 2, h / 2 - 2, w * 0.5, '#fff6dc');
+      g.globalAlpha = 0.9;
       drawMark(g, mark, w / 2, h / 2, w * 0.5, markColor);
       g.globalAlpha = 1;
     }
@@ -646,5 +667,96 @@ export function rugTex() {
       g.fillStyle = gr;
       g.fillRect(0, 0, w, h);
     }
+  });
+}
+
+/** かみの毛の すじ（上から 下へ ながれる こまかい 線） */
+export function hairTex() {
+  return make('hair', 256, 256, (g, w, h) => {
+    g.fillStyle = '#d8d8d8';
+    g.fillRect(0, 0, w, h);
+    const r = rng(19);
+    for (let i = 0; i < 900; i++) {
+      const x = r() * w;
+      const v = 150 + Math.floor(r() * 105);
+      g.strokeStyle = `rgba(${v},${v},${v},${0.35 + r() * 0.5})`;
+      g.lineWidth = 0.6 + r() * 1.4;
+      g.beginPath();
+      g.moveTo(x, 0);
+      g.bezierCurveTo(x + (r() - 0.5) * 8, h * 0.33, x + (r() - 0.5) * 8, h * 0.66, x + (r() - 0.5) * 6, h);
+      g.stroke();
+    }
+  });
+}
+
+/** ぬのの 織り目（ワンピース） */
+export function fabricTex() {
+  return make(
+    'fabric',
+    128,
+    128,
+    (g, w, h) => {
+      g.fillStyle = '#ececec';
+      g.fillRect(0, 0, w, h);
+      const r = rng(23);
+      for (let y = 0; y < h; y += 2)
+        for (let x = 0; x < w; x += 2) {
+          const on = ((x >> 1) + (y >> 1)) % 2 === 0;
+          const v = on ? 255 : 200 + Math.floor(r() * 25);
+          g.fillStyle = `rgb(${v},${v},${v})`;
+          g.fillRect(x, y, 2, 2);
+        }
+    },
+    { repeat: [10, 6] },
+  );
+}
+
+/** ほんものの チーズの かわ（まだらな いろ、こまかい あな、ひび、ぬのの あと） */
+export function rindTex(kind: 'natural' | 'smooth' = 'natural') {
+  return make('rind2-' + kind, 512, 256, (g, w, h) => {
+    const r = rng(kind === 'natural' ? 71 : 72);
+    g.fillStyle = '#e6e6e6';
+    g.fillRect(0, 0, w, h);
+    // まだら（大きな ムラ）
+    for (let i = 0; i < 70; i++) {
+      const x = r() * w;
+      const y = r() * h;
+      const rad = 20 + r() * 70;
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+      const v = r() < 0.5 ? '255,255,255' : '120,110,95';
+      gr.addColorStop(0, `rgba(${v},${(kind === 'natural' ? 0.16 : 0.07) + r() * 0.1})`);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr;
+      g.fillRect(0, 0, w, h);
+    }
+    // ぬのの あと（よこ すじ）
+    if (kind === 'natural')
+      for (let y = 0; y < h; y += 3) {
+        g.fillStyle = `rgba(90,80,60,${0.03 + r() * 0.05})`;
+        g.fillRect(0, y, w, 1);
+      }
+    // こまかい あな・つぶ
+    for (let i = 0; i < 2200; i++) {
+      g.fillStyle = r() < 0.6 ? `rgba(80,65,40,${0.1 + r() * 0.25})` : `rgba(255,255,240,${0.2 + r() * 0.3})`;
+      g.beginPath();
+      g.arc(r() * w, r() * h, 0.4 + r() * 1.3, 0, Math.PI * 2);
+      g.fill();
+    }
+    // ひび
+    if (kind === 'natural')
+      for (let i = 0; i < 26; i++) {
+        let x = r() * w;
+        let y = r() * h;
+        g.strokeStyle = `rgba(70,55,35,${0.15 + r() * 0.2})`;
+        g.lineWidth = 0.7;
+        g.beginPath();
+        g.moveTo(x, y);
+        for (let k = 0; k < 6; k++) {
+          x += (r() - 0.5) * 18;
+          y += (r() - 0.5) * 10;
+          g.lineTo(x, y);
+        }
+        g.stroke();
+      }
   });
 }

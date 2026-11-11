@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { cheeseTopTex, fiberTex, holesTex, moldTex, speckleTex, veinsTex } from '../tex';
+import { cheeseTopTex, fiberTex, holesTex, moldTex, rindTex, speckleTex, veinsTex } from '../tex';
 
 /**
  * いろいろな チーズの 3D モデル。
@@ -50,7 +50,7 @@ export function CheeseWheel({
   // テクスチャは 形と マークごとに 1つ。色は material.color で そめる（熟成で 色が かわっても 作りなおさない）
   const mats = useMemo(() => {
     const side = new THREE.MeshStandardMaterial({
-      map: speckleTex('#ffffff', '#c9a25a', 'rind-speck2', 260),
+      map: rindTex('natural'),
       roughness: 0.6,
     });
     const top = new THREE.MeshStandardMaterial({
@@ -97,9 +97,9 @@ export function CheeseWheel({
   }, [mold, mats, rind, paste, rough, inside]);
 
   const geos = useMemo(() => {
-    const body = new THREE.CylinderGeometry(radius, radius, height, 48, 1, false, WEDGE / 2, Math.PI * 2 - WEDGE);
-    const full = new THREE.CylinderGeometry(radius, radius, height, 48, 1, false);
-    const wedge = new THREE.CylinderGeometry(radius, radius, height, 12, 1, false, -WEDGE / 2, WEDGE);
+    const body = roundedWheel(radius, height, 48, WEDGE / 2, Math.PI * 2 - WEDGE);
+    const full = roundedWheel(radius, height, 48);
+    const wedge = roundedWheel(radius, height, 12, -WEDGE / 2, WEDGE);
     const face = new THREE.PlaneGeometry(radius, height);
     face.translate(radius / 2, 0, 0);
     const fuzzGeo = new THREE.CylinderGeometry(radius * 1.015, radius * 1.015, height * 1.02, 48, 1, false);
@@ -225,4 +225,40 @@ export function CheeseBlock({
       )}
     </group>
   );
+}
+
+/**
+ * ふちが まるい チーズの 形（本物の チーズは 角が まるい）。
+ * Cylinder の 側面の 行を 上下の はしに あつめ、はしほど 半径を 小さく する。
+ */
+export function roundedWheel(radius: number, height: number, seg: number, thetaStart = 0, thetaLength = Math.PI * 2) {
+  const rows = 10;
+  const g = new THREE.CylinderGeometry(radius, radius, height, seg, rows, false, thetaStart, thetaLength);
+  const b = Math.min(radius, height) * 0.16;
+  const half = height / 2;
+  const p = g.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) {
+    let y = p.getY(i);
+    const x = p.getX(i);
+    const z = p.getZ(i);
+    const rr = Math.hypot(x, z);
+    const isCap = Math.abs(Math.abs(y) - half) < 1e-6 && rr < radius - 1e-4;
+    if (isCap) {
+      // ふたは ふちを すこし 内がわへ
+      const k = (radius - b) / radius;
+      p.setX(i, x * k);
+      p.setZ(i, z * k);
+      continue;
+    }
+    // 側面の 行を はしに よせる
+    const t = y / half;
+    const tt = Math.sign(t) * Math.pow(Math.abs(t), 0.55);
+    y = tt * half;
+    const d = Math.abs(y) - (half - b);
+    const shrink = d > 0 ? b - Math.sqrt(Math.max(0, b * b - d * d)) : 0;
+    const k = rr > 0 ? (radius - shrink) / rr : 1;
+    p.setXYZ(i, x * k, y, z * k);
+  }
+  g.computeVertexNormals();
+  return g;
 }
