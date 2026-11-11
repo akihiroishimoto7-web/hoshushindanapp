@@ -1,9 +1,10 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import * as THREE from 'three';
+import { fabricTex, hairTex } from '../tex';
 import { BlobShadow } from '../common';
 import { bake, G, type Part } from '../bake';
-import { bakedMat, unlitMat } from '../look';
+import { bakedMat, unlitMat, withRim } from '../look';
 
 /**
  * 主人公の女の子（プレイヤー）。チーズ色のワンピースに、赤いリボンの ふたつむすび。
@@ -26,12 +27,46 @@ interface Assets {
   arm: THREE.BufferGeometry;
   body: THREE.BufferGeometry;
   head: THREE.BufferGeometry;
+  hair: THREE.BufferGeometry;
   tails: THREE.BufferGeometry;
   eyes: THREE.BufferGeometry;
   happy: THREE.BufferGeometry;
   blush: THREE.BufferGeometry;
 }
 let assets: Assets | null = null;
+let _hair: THREE.MeshPhysicalMaterial | null = null;
+/** かみの毛: すじの もようと、つやの わ（エンジェルリング） */
+function hairMat(): THREE.MeshPhysicalMaterial {
+  if (!_hair)
+    _hair = withRim(
+      new THREE.MeshPhysicalMaterial({
+        vertexColors: true,
+        map: hairTex(),
+        roughness: 0.42,
+        sheen: 0.6,
+        sheenColor: new THREE.Color('#ffd9b0'),
+        sheenRoughness: 0.4,
+        anisotropy: 0.8,
+        anisotropyRotation: Math.PI / 2,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.35,
+      }),
+      '#ffe9c8',
+      0.3,
+    );
+  return _hair!;
+}
+let _dress: THREE.MeshPhysicalMaterial | null = null;
+/** ワンピース: ぬのの 織り目と、ふんわりした つや（シーン） */
+function dressMat(): THREE.MeshPhysicalMaterial {
+  if (!_dress)
+    _dress = withRim(
+      new THREE.MeshPhysicalMaterial({ vertexColors: true, map: fabricTex(), roughness: 0.85, sheen: 1, sheenColor: new THREE.Color('#fff4d0'), sheenRoughness: 0.5 }),
+      '#fff1d8',
+      0.3,
+    );
+  return _dress!;
+}
 const blushMat = new THREE.MeshBasicMaterial({ color: '#ff7d96', transparent: true, opacity: 0.5, depthWrite: false });
 
 function build(): Assets {
@@ -73,19 +108,21 @@ function build(): Assets {
   const head: Part[] = [
     { geo: G.sphere(0.28, 28, 22), color: SKIN, pos: [0, 0.25, 0], scale: [1.04, 0.97, 1] },
     // かみ（あたまの うえ と うしろ）
-    { geo: new THREE.SphereGeometry(0.295, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.46), color: HAIR, pos: [0, 0.27, -0.03], rot: [-0.32, 0, 0], scale: [1.06, 1, 1.05] },
-    { geo: new THREE.SphereGeometry(0.29, 20, 16, Math.PI * 1.0, Math.PI * 1.0, 0, Math.PI * 0.82), color: HAIR, pos: [0, 0.25, -0.03], scale: [1.07, 1.08, 1.03] },
     // はな と くち
     { geo: G.sphere(0.012, 6, 5), color: '#f5b9a0', pos: [0, 0.2, 0.283] },
     // みみ
     { geo: G.sphere(0.045, 8, 6), color: SKIN, pos: [-0.285, 0.22, 0.0], scale: [0.6, 1, 0.8] },
     { geo: G.sphere(0.045, 8, 6), color: SKIN, pos: [0.285, 0.22, 0.0], scale: [0.6, 1, 0.8] },
     // あほげ
+  ];
+  const hair: Part[] = [
+    { geo: new THREE.SphereGeometry(0.295, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.46), color: HAIR, pos: [0, 0.27, -0.03], rot: [-0.32, 0, 0], scale: [1.06, 1, 1.05] },
+    { geo: new THREE.SphereGeometry(0.29, 20, 16, Math.PI * 1.0, Math.PI * 1.0, 0, Math.PI * 0.82), color: HAIR, pos: [0, 0.25, -0.03], scale: [1.07, 1.08, 1.03] },
     { geo: G.cone(0.03, 0.12, 6), color: HAIR2, pos: [0.02, 0.6, 0], rot: [0, 0, -0.5] },
   ];
   // まえがみ（ぱっつん ぎみに ならべる）
   [-0.2, -0.1, 0, 0.1, 0.2].forEach((x, i) => {
-    head.push({ geo: G.sphere(0.085, 10, 8), color: i % 2 ? HAIR2 : HAIR, pos: [x, 0.445 - Math.abs(x) * 0.2, 0.2 - Math.abs(x) * 0.3], scale: [0.85, 0.6, 0.55] });
+    hair.push({ geo: G.sphere(0.085, 10, 8), color: i % 2 ? HAIR2 : HAIR, pos: [x, 0.445 - Math.abs(x) * 0.2, 0.2 - Math.abs(x) * 0.3], scale: [0.85, 0.6, 0.55] });
   });
   const tails: Part[] = [];
   [-1, 1].forEach((sx) => {
@@ -126,7 +163,7 @@ function build(): Assets {
     { geo: G.sphere(0.05, 10, 8), pos: [-0.18, 0.155, 0.215], rot: [0, -0.6, 0], scale: [1, 0.62, 0.2] },
     { geo: G.sphere(0.05, 10, 8), pos: [0.18, 0.155, 0.215], rot: [0, 0.6, 0], scale: [1, 0.62, 0.2] },
   ]);
-  return { leg, arm, body: bake(body), head: bake(head), tails: bake(tails), eyes: bake(eyes), happy: bake(happy), blush };
+  return { leg, arm, body: bake(body), head: bake(head), hair: bake(hair), tails: bake(tails), eyes: bake(eyes), happy: bake(happy), blush };
 }
 
 export function Girl({
@@ -223,13 +260,14 @@ export function Girl({
       <group ref={body}>
         <mesh ref={legL} geometry={A.leg} material={bakedMat(0.75, 0.3)} position={[0.09, 0.32, 0]} />
         <mesh ref={legR} geometry={A.leg} material={bakedMat(0.75, 0.3)} position={[-0.09, 0.32, 0]} />
-        <mesh geometry={A.body} material={bakedMat(0.75, 0.3)} />
+        <mesh geometry={A.body} material={dressMat()} />
         <mesh ref={armL} geometry={A.arm} material={bakedMat(0.75, 0.3)} position={[0.2, 0.78, 0]} rotation-z={0.2} />
         <mesh ref={armR} geometry={A.arm} material={bakedMat(0.75, 0.3)} position={[-0.2, 0.78, 0]} rotation-z={-0.2} />
         {carry && holding && <group position={[0, 0.55, 0.36]}>{holding}</group>}
         <group ref={head} position-y={0.86}>
           <mesh geometry={A.head} material={bakedMat(0.75, 0.3)} />
-          <mesh ref={tails} geometry={A.tails} material={bakedMat(0.75, 0.3)} />
+          <mesh geometry={A.hair} material={hairMat()} />
+          <mesh ref={tails} geometry={A.tails} material={hairMat()} />
           <mesh ref={eyes} geometry={A.eyes} material={unlitMat()} position={[0, 0.235, 0.262]} />
           <mesh ref={happy} geometry={A.happy} material={unlitMat()} position={[0, 0.235, 0.262]} visible={false} />
           <mesh geometry={A.blush} material={blushMat} />
