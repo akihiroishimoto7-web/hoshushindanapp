@@ -83,7 +83,7 @@ export function CaseinCloud({
         }
       >
         <icosahedronGeometry args={[radius, 2]} />
-        <meshStandardMaterial color={color} roughness={0.75} />
+        <meshPhysicalMaterial color={color} roughness={0.45} sheen={1} sheenColor="#ffe2c0" transparent opacity={0.92} />
       </instancedMesh>
       <lineSegments geometry={lineGeo} frustumCulled={false}>
         <lineBasicMaterial color={hairColor} transparent opacity={0.9} />
@@ -93,8 +93,8 @@ export function CaseinCloud({
 }
 
 const labMats = {
-  body: new THREE.MeshStandardMaterial({ color: '#c9b6ff', roughness: 0.4, emissive: '#7a5cff', emissiveIntensity: 0.12 }),
-  body2: new THREE.MeshStandardMaterial({ color: '#ffc2dc', roughness: 0.4, emissive: '#ff6fa8', emissiveIntensity: 0.1 }),
+  body: new THREE.MeshPhysicalMaterial({ color: '#c9b6ff', roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2, sheen: 0.6, sheenColor: new THREE.Color('#ffffff'), emissive: '#7a5cff', emissiveIntensity: 0.1 }),
+  body2: new THREE.MeshPhysicalMaterial({ color: '#ffc2dc', roughness: 0.4, emissive: '#ff6fa8', emissiveIntensity: 0.1 , clearcoat: 0.8, clearcoatRoughness: 0.2, sheen: 0.6, sheenColor: new THREE.Color('#ffffff') }),
   eye: new THREE.MeshBasicMaterial({ color: '#3a2a5a' }),
   shine: new THREE.MeshBasicMaterial({ color: '#ffffff' }),
   mouth: new THREE.MeshBasicMaterial({ color: '#7a2e4e' }),

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { withFresnelAlpha } from '../look';
 import { woodTex } from '../tex';
 import { BlobShadow } from '../common';
 
@@ -67,13 +68,21 @@ export function Table({ w = 1.6, d = 1, h = 0.8, color = '#c58b52' }: { w?: numb
 }
 
 /** ガラスのコップ */
-export const glassMat = new THREE.MeshStandardMaterial({
-  color: '#e8f6ff',
-  transparent: true,
-  opacity: 0.28,
-  roughness: 0.05,
-  metalness: 0.1,
-  depthWrite: false,
-  side: THREE.DoubleSide,
-});
+export const glassMat = withFresnelAlpha(
+  new THREE.MeshPhysicalMaterial({
+    color: '#eef8ff',
+    roughness: 0.02,
+    metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.02,
+    ior: 1.5,
+    specularIntensity: 1,
+    side: THREE.DoubleSide,
+  }),
+  0.08,
+  0.6,
+  2.5,
+  0.45,
+  '#ffffff',
+);
 export const milkMat = new THREE.MeshPhysicalMaterial({ color: '#fffdf6', roughness: 0.22, emissive: '#fff8e6', emissiveIntensity: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 });
