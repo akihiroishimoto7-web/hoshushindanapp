@@ -12,7 +12,7 @@ import { agedLook, agingMaxDays, DEFAULT_CHEESE, formatDays, MARK_COLOR, TYPE_NA
 import { setShot } from '../../three/CameraRig';
 import { BlobShadow, Motes, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
-import { SunShadow } from '../../three/realism';
+import { RoomAO, SunShadow } from '../../three/realism';
 import { Environment, Lightformer } from '@react-three/drei';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -406,7 +406,7 @@ function DisplayTable() {
 
 function ShopRoom() {
   const floor = useMemo(() => {
-    const t = woodTex('#e0b07a', '#b07a45', 'shopfloor', 8).clone();
+    const t = woodTex('#c99363', '#8a5a32', 'shopfloor2', 8).clone();
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(10, 8);
     t.needsUpdate = true;
@@ -430,6 +430,7 @@ function ShopRoom() {
         <planeGeometry args={[40, 30]} />
         <meshStandardMaterial map={floor} roughness={0.85} />
       </mesh>
+      <RoomAO width={14} depth={12} back={-3.5} />
       <mesh position={[0, 3, -3.5]}>
         <planeGeometry args={[16, 6]} />
         <meshStandardMaterial map={wall} roughness={0.95} />

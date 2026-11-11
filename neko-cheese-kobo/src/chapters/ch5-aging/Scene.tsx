@@ -11,7 +11,7 @@ import { agedLook, agingMaxDays, cheeseLook, DEFAULT_CHEESE, formatDays, MARK_CO
 import { setShot } from '../../three/CameraRig';
 import { BlobShadow, Glow, RewardRays, Tappable } from '../../three/common';
 import { Mouse, SecretSpot } from '../../three/props/Secrets';
-import { SunShadow } from '../../three/realism';
+import { RoomAO, SunShadow } from '../../three/realism';
 import { Environment, Lightformer } from '@react-three/drei';
 import { fx } from '../../three/fx';
 import { useTarget } from '../../three/targets';
@@ -151,6 +151,9 @@ export default function AgingScene() {
       <Corridor />
       <BigDoor open={open} onTap={tapDoor} doorRef={doorRef} />
       <Cellar />
+      <group position={[0, 0, 0]}>
+        <RoomAO width={10} depth={10} back={-17} front={-7} size={1.2} />
+      </group>
 
       {/* まんなかの だいと きみの チーズ */}
       <group position={TABLE}>

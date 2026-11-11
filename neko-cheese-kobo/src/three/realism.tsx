@@ -210,3 +210,48 @@ export function SunShadow({
     />
   );
 }
+
+/** 床と 壁の さかいめの やわらかい かげ（部屋の 角を 立体的に 見せる） */
+let aoTex: THREE.Texture | null = null;
+function aoStrip() {
+  if (aoTex) return aoTex;
+  const c = document.createElement('canvas');
+  c.width = 4;
+  c.height = 64;
+  const g = c.getContext('2d')!;
+  const gr = g.createLinearGradient(0, 0, 0, 64);
+  gr.addColorStop(0, 'rgba(0,0,0,0.75)');
+  gr.addColorStop(0.35, 'rgba(0,0,0,0.25)');
+  gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 4, 64);
+  aoTex = new THREE.CanvasTexture(c);
+  return aoTex;
+}
+
+export function RoomAO({ width, depth, back, size = 1.4, sides = true, front }: { width: number; depth: number; back: number; size?: number; sides?: boolean; front?: number }) {
+  const mat = useRef(
+    new THREE.MeshBasicMaterial({ color: '#000000', alphaMap: aoStrip(), transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }),
+  ).current;
+  const fz = front ?? back + depth;
+  const strips: { pos: THREE.Vector3Tuple; rot: THREE.Vector3Tuple; w: number; h: number }[] = [
+    // 床に たおれる かげ
+    { pos: [0, 0.012, back + size / 2], rot: [-Math.PI / 2, 0, Math.PI], w: width, h: size },
+    // 壁の 下の かげ
+    { pos: [0, size / 2, back + 0.01], rot: [0, 0, Math.PI], w: width, h: size },
+  ];
+  if (sides)
+    [-1, 1].forEach((sx) => {
+      strips.push({ pos: [sx * (width / 2 - size / 2), 0.012, (back + fz) / 2], rot: [-Math.PI / 2, 0, sx > 0 ? Math.PI / 2 : -Math.PI / 2], w: fz - back, h: size });
+      strips.push({ pos: [sx * (width / 2 - 0.01), size / 2, (back + fz) / 2], rot: [0, -sx * Math.PI / 2, Math.PI], w: fz - back, h: size });
+    });
+  return (
+    <group>
+      {strips.map((s, i) => (
+        <mesh key={i} position={s.pos} rotation={s.rot} material={mat} userData={{ rz: true }} renderOrder={1}>
+          <planeGeometry args={[s.w, s.h]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}

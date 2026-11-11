@@ -2,9 +2,9 @@ import { Environment, Lightformer } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { plasterTex, woodTex } from '../tex';
+import { plasterTex, rugTex, woodTex } from '../tex';
 import { BlobShadow, Glow, Motes } from '../common';
-import { SunShadow } from '../realism';
+import { RoomAO, SunShadow } from '../realism';
 import { CheeseWheel } from '../props/Cheese';
 
 /**
@@ -54,14 +54,11 @@ export function WorkshopRoom({ children }: { children?: ReactNode }) {
       </mesh>
       {/* ラグ */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.01, 1.6]}>
-        <circleGeometry args={[2.6, 40]} />
-        <meshStandardMaterial color="#e9a17a" roughness={1} />
-      </mesh>
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, 1.6]}>
-        <ringGeometry args={[2.0, 2.25, 40]} />
-        <meshStandardMaterial color="#fff1d6" roughness={1} />
+        <circleGeometry args={[2.6, 48]} />
+        <meshStandardMaterial map={rugTex()} roughness={1} />
       </mesh>
       {/* 壁 */}
+      <RoomAO width={16} depth={12} back={-5} />
       <mesh position={[0, 3, -5]}>
         <planeGeometry args={[18, 6]} />
         <meshStandardMaterial map={wall} roughness={0.95} />

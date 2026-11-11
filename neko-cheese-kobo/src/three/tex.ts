@@ -136,30 +136,62 @@ export function holsteinTex() {
 export function woodTex(base = '#c58b52', dark = '#9c6534', key = 'wood', planks = 6) {
   return make(
     key,
-    256,
-    256,
+    512,
+    512,
     (g, w, h) => {
-      g.fillStyle = base;
-      g.fillRect(0, 0, w, h);
-      const r = rng(3);
+      const r = rng(key.length * 17 + planks);
+      const bc = new THREE.Color(base);
+      const dc = new THREE.Color(dark);
       const ph = h / planks;
       for (let p = 0; p < planks; p++) {
         const y0 = p * ph;
-        g.fillStyle = p % 2 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-        g.fillRect(0, y0, w, ph);
-        g.strokeStyle = 'rgba(80,40,10,0.18)';
-        g.lineWidth = 1;
-        for (let k = 0; k < 5; k++) {
-          const yy = y0 + r() * ph;
-          g.beginPath();
-          g.moveTo(0, yy);
-          for (let x = 0; x <= w; x += 16) g.lineTo(x, yy + Math.sin(x * 0.03 + k) * 2);
-          g.stroke();
+        // 板ごとに 長さを かえて つぎめを ずらす
+        let x = -r() * w * 0.5;
+        while (x < w) {
+          const len = w * (0.45 + r() * 0.6);
+          const c = bc.clone().lerp(dc, r() * 0.45).offsetHSL((r() - 0.5) * 0.015, (r() - 0.5) * 0.08, (r() - 0.5) * 0.06);
+          g.fillStyle = '#' + c.getHexString();
+          g.fillRect(x, y0, len, ph);
+          // 木目（ゆるく うねる 細い すじを たくさん）
+          for (let k = 0; k < 14; k++) {
+            const yy = y0 + r() * ph;
+            const amp = 1 + r() * 3;
+            const fr = 0.008 + r() * 0.02;
+            g.strokeStyle = `rgba(${40 + r() * 30},${20 + r() * 15},5,${0.06 + r() * 0.16})`;
+            g.lineWidth = 0.6 + r() * 1.4;
+            g.beginPath();
+            for (let xx = x; xx <= x + len; xx += 6) g.lineTo(xx, yy + Math.sin(xx * fr + k) * amp);
+            g.stroke();
+          }
+          // ふし
+          if (r() < 0.45) {
+            const kx = x + r() * len;
+            const ky = y0 + ph * (0.3 + r() * 0.4);
+            for (let ring = 5; ring > 0; ring--) {
+              g.strokeStyle = `rgba(60,30,8,${0.12 + ring * 0.03})`;
+              g.lineWidth = 1;
+              g.beginPath();
+              g.ellipse(kx, ky, ring * 2.6, ring * 1.3, 0, 0, Math.PI * 2);
+              g.stroke();
+            }
+          }
+          // 板の はしの すきま（くらい）
+          g.fillStyle = 'rgba(30,15,5,0.55)';
+          g.fillRect(x, y0, 2, ph);
+          x += len;
         }
-        g.fillStyle = dark;
-        g.fillRect(0, y0 + ph - 2, w, 2);
-        const off = r() * w;
-        g.fillRect(off, y0, 2, ph);
+        g.fillStyle = 'rgba(30,15,5,0.6)';
+        g.fillRect(0, y0 + ph - 2.5, w, 2.5);
+        g.fillStyle = 'rgba(255,240,210,0.12)';
+        g.fillRect(0, y0, w, 1.5);
+      }
+      // 使いこまれた ムラ
+      for (let i = 0; i < 40; i++) {
+        const gr = g.createRadialGradient(r() * w, r() * h, 0, r() * w, r() * h, 30 + r() * 70);
+        gr.addColorStop(0, `rgba(${r() < 0.5 ? '255,235,200' : '50,25,8'},${0.04 + r() * 0.05})`);
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr;
+        g.fillRect(0, 0, w, h);
       }
     },
     { repeat: [1, 1] },
@@ -565,4 +597,54 @@ export function raysTex() {
     },
     { srgb: false },
   );
+}
+
+/** 手織りの ラグ（たて糸・よこ糸の 織り目と ふちの もよう） */
+export function rugTex() {
+  return make('rug', 512, 512, (g, w, h) => {
+    const r = rng(61);
+    g.fillStyle = '#d9845f';
+    g.fillRect(0, 0, w, h);
+    // 織り目
+    for (let y = 0; y < h; y += 3)
+      for (let x = (y / 3) % 2 ? 0 : 3; x < w; x += 6) {
+        g.fillStyle = `rgba(${r() < 0.5 ? '255,220,190' : '90,35,15'},${0.08 + r() * 0.1})`;
+        g.fillRect(x, y, 3, 2);
+      }
+    // ふちの もよう（同心円の 帯）
+    const cx = w / 2;
+    const cy = h / 2;
+    const bands: [number, string][] = [
+      [0.98, '#7a3b26'],
+      [0.9, '#f2d7a8'],
+      [0.86, '#7a3b26'],
+      [0.74, '#e9a17a'],
+      [0.62, '#f2d7a8'],
+      [0.58, '#b85a3c'],
+    ];
+    bands.forEach(([k, c], i) => {
+      g.strokeStyle = c;
+      g.lineWidth = i % 2 ? 6 : 14;
+      g.beginPath();
+      g.arc(cx, cy, (w / 2) * k, 0, Math.PI * 2);
+      g.stroke();
+    });
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      g.fillStyle = '#f2d7a8';
+      g.beginPath();
+      g.arc(cx + Math.cos(a) * w * 0.4, cy + Math.sin(a) * h * 0.4, 7, 0, Math.PI * 2);
+      g.fill();
+    }
+    // ふみこまれた ムラ
+    for (let i = 0; i < 30; i++) {
+      const x = r() * w;
+      const y = r() * h;
+      const gr = g.createRadialGradient(x, y, 0, x, y, 40 + r() * 60);
+      gr.addColorStop(0, `rgba(60,25,10,${0.05 + r() * 0.06})`);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr;
+      g.fillRect(0, 0, w, h);
+    }
+  });
 }
