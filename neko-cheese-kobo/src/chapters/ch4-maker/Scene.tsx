@@ -523,7 +523,7 @@ export default function MakerScene() {
       </group>
 
       <Mouse id="mouse4" position={[0.2, 0, 2.6]} rotationY={-0.3} />
-      <WindowPeek id="bird" position={[-3, 2.42, -4.7]} rise={0.7}>
+      <WindowPeek id="bird" position={[1.55, 0.3, 1.55]} rise={0.45}>
         <BirdBody />
       </WindowPeek>
       <MilkCat
