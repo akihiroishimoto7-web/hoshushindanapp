@@ -28,10 +28,10 @@ const FEEDS = 8;
 // 顕微鏡で 見たような 脂肪球: なかは あわく すけ、ふちの 膜が ひかる
 const fatCore = withFresnelAlpha(
   new THREE.MeshPhysicalMaterial({ color: '#ffdf8a', roughness: 0.22, clearcoat: 0.6, emissive: '#ffd970', emissiveIntensity: 0.18 }),
-  0.82,
-  0.98,
+  0.92,
+  1.0,
   1.8,
-  0.12,
+  0.1,
   '#fff3c8',
 );
 const fatSkin = withFresnelAlpha(
@@ -301,8 +301,8 @@ function Micro({ acid, setAcid }: { acid: number; setAcid: (n: number) => void }
   const firstSugar = sugars.current[3].home;
   return (
     <>
-      <color attach="background" args={['#c6d3ec']} />
-      <fogExp2 attach="fog" args={['#cbd7ee', 0.05]} />
+      <color attach="background" args={['#a9bbdf']} />
+      <fogExp2 attach="fog" args={['#b0c1e2', 0.045]} />
       <MicroBackdrop />
       <hemisphereLight args={['#ffffff', '#ffe9c4', 1.6]} />
       <directionalLight position={[3, 6, 8]} intensity={1.6} color="#fff6e0" />
