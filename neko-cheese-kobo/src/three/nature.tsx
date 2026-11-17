@@ -2,6 +2,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { rng } from './tex';
+import { useProgress } from '../game/progress';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /**
@@ -42,7 +43,8 @@ export function GrassField({
 }) {
   const ref = useRef<THREE.InstancedMesh>(null);
   const small = typeof window !== 'undefined' && Math.min(window.innerWidth, window.innerHeight) < 600;
-  const n = Math.round(count * (small ? 0.8 : 1));
+  const lite = useProgress((p) => p.settings.lite);
+  const n = Math.round(count * (small ? 0.8 : 1) * (lite ? 0.3 : 1));
   const geo = useMemo(bladeGeometry, []);
   const mat = useMemo(() => {
     const m = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });

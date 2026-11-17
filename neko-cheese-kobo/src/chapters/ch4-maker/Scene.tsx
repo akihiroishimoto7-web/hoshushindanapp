@@ -7,6 +7,7 @@ import { useBus } from '../../game/bus';
 import { dialog, useDialog, catGesture } from '../../game/dialog';
 import { say } from '../../game/say';
 import { useProgress } from '../../game/progress';
+import { showToast } from '../../game/secrets';
 import { cheeseLook, curdSizeFromCuts, decideType, MARK_COLOR } from '../../game/cheese';
 import type { CheeseMark, CheeseResult, CheeseType } from '../../game/types';
 import { setShot } from '../../three/CameraRig';
@@ -162,6 +163,20 @@ export default function MakerScene() {
       agedDays: 0,
     };
     useProgress.getState().setCheese(result);
+    // チーズずかんに 記録（はじめての しゅるいなら おしらせ）
+    if (useProgress.getState().addMade(type)) {
+      const n = useProgress.getState().made.length;
+      setTimeout(
+        () =>
+          showToast(
+            n >= 3
+              ? { kind: 'secret', icon: '🏆', title: 'チーズずかん コンプリート！', text: '3しゅるい ぜんぶ つくったよ' }
+              : { kind: 'secret', icon: '🧀', title: 'あたらしい チーズ！', text: `チーズずかん ${n} / 3` },
+            3400,
+          ),
+        900,
+      );
+    }
     setCheese({ type, mark });
     fx.burst([MOLD_T[0], MOLD_Y + 0.6, MOLD_T[2]], { star: true, count: 16, color: [MARK_COLOR[mark], '#ffffff'], speed: 2, gravity: 0.5, life: 1, size: 0.35 });
   });

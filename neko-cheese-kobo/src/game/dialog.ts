@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { bus } from './bus';
+import { personalize } from './personal';
 import { useProgress } from './progress';
 import type { ChoiceStep, Emotion, Gesture, SayStep, Speaker, Step, TaskStep } from './types';
 
@@ -95,7 +96,7 @@ function sideActive() {
 function showSay(s: SayStep) {
   lineId++;
   useDialog.setState({
-    line: { id: lineId, who: s.who ?? 'milk', text: s.text, face: s.face, gesture: s.gesture, auto: s.auto },
+    line: { id: lineId, who: s.who ?? 'milk', text: personalize(s.text), face: s.face, gesture: s.gesture, auto: s.auto },
     choices: null,
     task: null,
   });
@@ -106,7 +107,7 @@ function showSay(s: SayStep) {
 function showChoice(s: ChoiceStep) {
   lineId++;
   useDialog.setState({
-    line: { id: lineId, who: s.who ?? 'milk', text: s.text, face: s.face, gesture: s.gesture },
+    line: { id: lineId, who: s.who ?? 'milk', text: personalize(s.text), face: s.face, gesture: s.gesture },
     choices: s.options.map((o) => o.label),
     task: null,
   });

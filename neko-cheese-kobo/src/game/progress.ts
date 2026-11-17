@@ -11,6 +11,8 @@ export interface Settings {
   sound: boolean;
   /** おんがく */
   music: boolean;
+  /** かるいモード（草・毛並み・影を へらして 軽く うごかす） */
+  lite: boolean;
 }
 
 interface SaveData {
@@ -24,7 +26,19 @@ interface SaveData {
   secrets: string[];
   /** ミルクの きせかえ（あとから 足した項目） */
   outfit: string;
+  /** つくった チーズの しゅるい（soft / semi / hard） */
+  made: string[];
+  /** 主人公（なまえ・ふく・かみ） */
+  player: Player;
 }
+
+export interface Player {
+  name: string;
+  dress: string;
+  hair: string;
+  style: 'twin' | 'pony' | 'short';
+}
+export const DEFAULT_PLAYER: Player = { name: '', dress: '#ffd24a', hair: '#7a4526', style: 'twin' };
 
 interface ProgressState extends SaveData {
   setCurrent: (i: number) => void;
@@ -34,6 +48,8 @@ interface ProgressState extends SaveData {
   setSetting: (k: keyof Settings, v: boolean) => void;
   addSecret: (id: string) => boolean;
   setOutfit: (id: string) => void;
+  addMade: (type: string) => boolean;
+  setPlayer: (p: Partial<Player>) => void;
   reset: () => void;
 }
 
@@ -43,9 +59,11 @@ const defaults: SaveData = {
   stamps: Array(CHAPTER_COUNT).fill(false),
   cheese: null,
   finished: false,
-  settings: { voice: true, sound: true, music: true },
+  settings: { voice: true, sound: true, music: true, lite: false },
   secrets: [],
   outfit: 'none',
+  made: [],
+  player: DEFAULT_PLAYER,
 };
 
 function load(): SaveData {
@@ -63,6 +81,8 @@ function load(): SaveData {
       settings: { ...defaults.settings, ...(d.settings ?? {}) },
       secrets: Array.isArray(d.secrets) ? d.secrets.filter((x) => typeof x === 'string') : [],
       outfit: typeof d.outfit === 'string' ? d.outfit : 'none',
+      made: Array.isArray(d.made) ? d.made.filter((x) => typeof x === 'string') : d.cheese ? [d.cheese.type] : [],
+      player: { ...DEFAULT_PLAYER, ...(d.player ?? {}) },
     };
   } catch {
     return structuredClone(defaults);
@@ -84,6 +104,8 @@ function save(s: SaveData) {
       settings: s.settings,
       secrets: s.secrets,
       outfit: s.outfit,
+      made: s.made,
+      player: s.player,
     };
     localStorage.setItem(KEY, JSON.stringify(data));
   } catch {
@@ -113,6 +135,13 @@ export const useProgress = create<ProgressState>((set, get) => ({
   },
   setSetting: (k, v) => set({ settings: { ...get().settings, [k]: v } }),
   setOutfit: (id) => set({ outfit: id }),
+  addMade: (type) => {
+    const cur = get().made;
+    if (cur.includes(type)) return false;
+    set({ made: [...cur, type] });
+    return true;
+  },
+  setPlayer: (p) => set({ player: { ...get().player, ...p } }),
   addSecret: (id) => {
     const cur = get().secrets;
     if (cur.includes(id)) return false;
@@ -121,7 +150,8 @@ export const useProgress = create<ProgressState>((set, get) => ({
   },
   reset: () => {
     const keep = get().settings;
-    set({ ...structuredClone(defaults), settings: keep });
+    const player = get().player;
+    set({ ...structuredClone(defaults), settings: keep, player });
   },
 }));
 

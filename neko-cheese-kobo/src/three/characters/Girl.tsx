@@ -3,6 +3,7 @@ import { useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import * as THREE from 'three';
 import { fabricTex, hairTex } from '../tex';
 import { BlobShadow } from '../common';
+import { useProgress, type Player } from '../../game/progress';
 import { bake, G, type Part } from '../bake';
 import { bakedMat, unlitMat, withRim } from '../look';
 
@@ -11,9 +12,6 @@ import { bakedMat, unlitMat, withRim } from '../look';
  * パーツは 頂点カラーで まとめて 10 ドローコールほど。
  */
 const SKIN = '#ffdcc6';
-const HAIR = '#7a4526';
-const HAIR2 = '#8f5530';
-const DRESS = '#ffd24a';
 const RED = '#ef4e5e';
 
 let cheerFlag = 0;
@@ -33,7 +31,7 @@ interface Assets {
   happy: THREE.BufferGeometry;
   blush: THREE.BufferGeometry;
 }
-let assets: Assets | null = null;
+const assetCache = new Map<string, Assets>();
 let _hair: THREE.MeshPhysicalMaterial | null = null;
 /** かみの毛: すじの もようと、つやの わ（エンジェルリング） */
 function hairMat(): THREE.MeshPhysicalMaterial {
@@ -69,7 +67,8 @@ function dressMat(): THREE.MeshPhysicalMaterial {
 }
 const blushMat = new THREE.MeshBasicMaterial({ color: '#ff7d96', transparent: true, opacity: 0.5, depthWrite: false });
 
-function build(): Assets {
+function build(DRESS: string, HAIR: string, style: Player['style']): Assets {
+  const HAIR2 = '#' + new THREE.Color(HAIR).offsetHSL(0, 0, 0.06).getHexString();
   const leg = bake([
     { geo: G.capsule(0.055, 0.2, 8), color: SKIN, pos: [0, -0.14, 0] },
     { geo: G.cyl(0.062, 0.058, 0.1, 10), color: '#ffffff', pos: [0, -0.21, 0] },
@@ -125,15 +124,33 @@ function build(): Assets {
     hair.push({ geo: G.sphere(0.085, 10, 8), color: i % 2 ? HAIR2 : HAIR, pos: [x, 0.445 - Math.abs(x) * 0.2, 0.2 - Math.abs(x) * 0.3], scale: [0.85, 0.6, 0.55] });
   });
   const tails: Part[] = [];
-  [-1, 1].forEach((sx) => {
+  const bow = (x: number, y: number, z: number, rz: number) => [
+    { geo: G.sphere(0.055, 8, 6), color: RED, pos: [x - 0.03, y, z], scale: [1.3, 0.8, 0.6], rot: [0, 0, rz] },
+    { geo: G.sphere(0.055, 8, 6), color: RED, pos: [x + 0.03, y, z], scale: [1.3, 0.8, 0.6], rot: [0, 0, -rz] },
+    { geo: G.sphere(0.03, 8, 6), color: '#ff8fa3', pos: [x, y, z + 0.03] },
+  ] as Part[];
+  if (style === 'twin') {
+    [-1, 1].forEach((sx) => {
+      tails.push(
+        { geo: G.sphere(0.11, 12, 10), color: HAIR, pos: [sx * 0.37, 0.2, -0.05], scale: [0.8, 1.35, 0.8], rot: [0, 0, sx * 0.25] },
+        { geo: G.sphere(0.07, 10, 8), color: HAIR2, pos: [sx * 0.4, 0.06, -0.05], scale: [0.8, 1.1, 0.8] },
+        ...bow(sx * 0.315, 0.33, -0.02, sx * 0.6),
+      );
+    });
+  } else if (style === 'pony') {
     tails.push(
-      { geo: G.sphere(0.11, 12, 10), color: HAIR, pos: [sx * 0.37, 0.2, -0.05], scale: [0.8, 1.35, 0.8], rot: [0, 0, sx * 0.25] },
-      { geo: G.sphere(0.07, 10, 8), color: HAIR2, pos: [sx * 0.4, 0.06, -0.05], scale: [0.8, 1.1, 0.8] },
-      { geo: G.sphere(0.055, 8, 6), color: RED, pos: [sx * 0.3, 0.35, -0.02], scale: [1.3, 0.8, 0.6], rot: [0, 0, sx * 0.6] },
-      { geo: G.sphere(0.055, 8, 6), color: RED, pos: [sx * 0.33, 0.3, -0.02], scale: [0.8, 1.3, 0.6], rot: [0, 0, sx * 0.6] },
-      { geo: G.sphere(0.03, 8, 6), color: '#ff8fa3', pos: [sx * 0.31, 0.325, 0.02] },
+      { geo: G.sphere(0.12, 14, 10), color: HAIR, pos: [0, 0.36, -0.33], scale: [0.85, 1.0, 0.9] },
+      { geo: G.sphere(0.1, 12, 10), color: HAIR, pos: [0, 0.18, -0.38], scale: [0.8, 1.5, 0.8], rot: [0.25, 0, 0] },
+      { geo: G.sphere(0.07, 10, 8), color: HAIR2, pos: [0, 0.0, -0.36], scale: [0.8, 1.2, 0.8] },
+      ...bow(0, 0.45, -0.3, 0.3),
     );
-  });
+  } else {
+    // ショート: よこの かみを すこし ふくらませて、 リボンは よこに 1つ
+    [-1, 1].forEach((sx) => {
+      tails.push({ geo: G.sphere(0.1, 12, 10), color: HAIR, pos: [sx * 0.27, 0.13, 0.0], scale: [0.7, 1.15, 0.9] });
+    });
+    tails.push(...bow(0.22, 0.47, 0.12, 0.5));
+  }
   const eyes: Part[] = [];
   const happy: Part[] = [];
   [-1, 1].forEach((sx) => {
@@ -180,8 +197,13 @@ export function Girl({
   position?: THREE.Vector3Tuple;
   rotationY?: number;
 }) {
-  if (!assets) assets = build();
-  const A = assets;
+  const player = useProgress((p) => p.player);
+  const key = `${player.dress}:${player.hair}:${player.style}`;
+  let A = assetCache.get(key);
+  if (!A) {
+    A = build(player.dress, player.hair, player.style);
+    assetCache.set(key, A);
+  }
   const own = useRef<THREE.Group>(null);
   const root = groupRef ?? own;
   const body = useRef<THREE.Group>(null);

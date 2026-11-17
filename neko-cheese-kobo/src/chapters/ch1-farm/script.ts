@@ -6,7 +6,7 @@ import type { Step } from '../../game/types';
  *           ぎゅうにゅうの なかみ（みず・あぶら・タンパク質・乳糖・ミネラル）。
  */
 export const script: Step[] = [
-  { t: 'say', text: 'やあ！ ぼくは ミルク。 チーズしょくにん だニャ！', face: 'happy', gesture: 'wave', sfx: 'meow' },
+  { t: 'say', text: 'やあ！ {よびかけ}ぼくは ミルク。 チーズしょくにん だニャ！', face: 'happy', gesture: 'wave', sfx: 'meow' },
   {
     t: 'choice',
     text: 'チーズって なにから できるか しってる？',

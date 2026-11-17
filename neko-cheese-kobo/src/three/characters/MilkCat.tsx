@@ -241,7 +241,8 @@ export function MilkCat({
   onTap,
   seed = 0,
 }: MilkCatProps) {
-  const fur = furProp ?? controlled;
+  const lite = useProgress((p) => p.settings.lite);
+  const fur = (furProp ?? controlled) && !lite;
   const savedOutfit = useProgress((p) => p.outfit);
   const outfit = outfitProp ?? (controlled ? savedOutfit : 'none');
   const A = getAssets(variant, scarf, apron);
