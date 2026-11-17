@@ -2,6 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { rng } from './tex';
+import { useProgress } from '../game/progress';
 
 /**
  * 質感を リアルにする しくみ（どの章にも 自動で かかる）
@@ -15,6 +16,11 @@ const FORCE = typeof window !== 'undefined' && /[?&]shadows/.test(window.locatio
 export function setShadows(on: boolean) {
   shadowsOn = on || FORCE;
 }
+// かるいモードでは 影を 切る
+useProgress.subscribe((s, prev) => {
+  if (s.settings.lite !== prev.settings.lite) setShadows(!s.settings.lite);
+});
+if (useProgress.getState().settings.lite) shadowsOn = FORCE;
 
 const normalCache = new WeakMap<THREE.Texture, THREE.Texture>();
 

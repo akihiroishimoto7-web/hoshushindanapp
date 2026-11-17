@@ -5,6 +5,7 @@ import { setShot } from '../three/CameraRig';
 import { Motes, SkyDome } from '../three/common';
 import { DistantHills, Clouds, FarmLights, Flowers, Ground, Grass, Trees, Windmill, CatHouse, Birds } from '../three/env/Farm';
 import { MilkCat } from '../three/characters/MilkCat';
+import { Girl } from '../three/characters/Girl';
 import { Cow } from '../three/characters/Cow';
 import { CheeseWheel } from '../three/props/Cheese';
 import { catFace, catGesture } from '../game/dialog';
@@ -52,7 +53,8 @@ export function TitleScene() {
       <group ref={cheese}>
         <CheeseWheel radius={1.3} height={0.9} position={[0, 0.45, 0]} mark="paw" cut />
       </group>
-      <MilkCat position={[0, 0.9, 0.1]} scale={1.15} />
+      <MilkCat position={[-0.35, 0.9, 0.1]} scale={1.15} />
+      <Girl position={[0.6, 0.9, 0.3]} rotationY={-0.25} />
     </>
   );
 }

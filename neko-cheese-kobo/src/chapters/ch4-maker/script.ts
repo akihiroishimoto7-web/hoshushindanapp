@@ -68,7 +68,7 @@ export const script: Step[] = [
   {
     t: 'choice',
     key: 'mark',
-    text: 'せかいに ひとつの、 きみの オリジナル！ マークを つけよう！',
+    text: 'せかいに ひとつの、 {なまえ}の オリジナル！ マークを つけよう！',
     face: 'love',
     gesture: 'cheer',
     options: [

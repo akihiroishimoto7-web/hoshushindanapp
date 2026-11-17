@@ -6,6 +6,7 @@ import { BlobShadow, HitArea } from '../common';
 import { bake, G, type Part } from '../bake';
 import { bakedMat, unlitMat, withRim } from '../look';
 import { FurShells } from '../fur';
+import { useProgress } from '../../game/progress';
 import { fx } from '../fx';
 
 /**
@@ -150,6 +151,7 @@ export function Cow({
   graze?: boolean;
   onTap?: () => void;
 }) {
+  const lite = useProgress((p) => p.settings.lite);
   const isCalf = scale < 0.75;
   const key = kind + isCalf;
   let A = cache.get(key);
@@ -243,7 +245,7 @@ export function Cow({
       {onTap && <HitArea r={1.25} position={[0, 1.0, 0.3]} />}
       <group ref={bodyG}>
         <mesh geometry={A.body} material={A.bodyMat} position-y={1.0} scale={[0.98, 0.88, 1.68]}>
-          <FurShells id={'cow-' + kind} geometry={A.body} base={A.bodyMat} layers={5} length={0.022} density={110} />
+          {!lite && <FurShells id={'cow-' + kind} geometry={A.body} base={A.bodyMat} layers={5} length={0.022} density={110} />}
         </mesh>
         <mesh geometry={A.legs} material={m} />
         <mesh ref={tail} geometry={A.tail} material={m} position={[0, 1.25, -0.84]} />

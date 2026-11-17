@@ -9,6 +9,7 @@ import { playSfx } from '../audio/sfx';
 import { SecretBook } from './Toast';
 import { secretsOf } from '../game/secrets';
 import { isUnlocked, OUTFITS, outfitForChapter } from '../game/outfits';
+import { CheeseBook, HomeExperiment, PlayerPanel } from './Extras';
 
 function unlockAll() {
   unlockAudio();
@@ -31,7 +32,7 @@ function Stamps({ fresh }: { fresh?: number }) {
 }
 
 export function TitleScreen() {
-  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset' | 'secrets' | 'outfit'>(null);
+  const [panel, setPanel] = useState<null | 'chapters' | 'settings' | 'reset' | 'secrets' | 'outfit' | 'me' | 'cheeses' | 'home'>(null);
   const progress = useProgress();
   const resume = hasProgress();
   const start = (i: number) => {
@@ -54,49 +55,32 @@ export function TitleScreen() {
         <button className="btn big" data-testid="start" onClick={() => start(next)}>
           {resume && !progress.finished ? '▶ つづきから' : '▶ あそぶ'}
         </button>
-        <div className="mini">
-          <button
-            className="btn sub"
-            onClick={() => {
-              unlockAll();
-              playSfx('tap');
-              setPanel('chapters');
-            }}
-          >
-            📖 おはなしを えらぶ
-          </button>
-          <button
-            className="btn sub"
-            onClick={() => {
-              unlockAll();
-              playSfx('tap');
-              setPanel('settings');
-            }}
-          >
-            ⚙️ せってい
-          </button>
-          <button
-            className="btn sub"
-            data-testid="secrets"
-            onClick={() => {
-              unlockAll();
-              playSfx('tap');
-              setPanel('secrets');
-            }}
-          >
-            🔍 ひみつ ずかん
-          </button>
-          <button
-            className="btn pink"
-            data-testid="outfit"
-            onClick={() => {
-              unlockAll();
-              playSfx('ting');
-              setPanel('outfit');
-            }}
-          >
-            🎀 きせかえ
-          </button>
+        <div className="mini-grid">
+          {(
+            [
+              ['chapters', '📖', 'おはなし', 'tap', 'sub'],
+              ['me', '👧', 'わたし', 'ting', 'pink'],
+              ['outfit', '🎀', 'きせかえ', 'ting', 'pink'],
+              ['cheeses', '🧀', 'チーズずかん', 'tap', 'sub'],
+              ['secrets', '🔍', 'ひみつずかん', 'tap', 'sub'],
+              ['home', '🏠', 'おうちで', 'tap', 'green'],
+              ['settings', '⚙️', 'せってい', 'tap', 'sub'],
+            ] as const
+          ).map(([id, ic, label, sfx, cls]) => (
+            <button
+              key={id}
+              className={`tile ${cls}`}
+              data-testid={id}
+              onClick={() => {
+                unlockAll();
+                playSfx(sfx);
+                setPanel(id);
+              }}
+            >
+              <span className="ic">{ic}</span>
+              <span>{label}</span>
+            </button>
+          ))}
         </div>
       </div>
       {panel === 'chapters' && (
@@ -133,6 +117,9 @@ export function TitleScreen() {
       )}
       {panel === 'secrets' && <SecretBook onClose={() => setPanel(null)} />}
       {panel === 'outfit' && <OutfitPanel onClose={() => setPanel(null)} />}
+      {panel === 'me' && <PlayerPanel onClose={() => setPanel(null)} />}
+      {panel === 'cheeses' && <CheeseBook onClose={() => setPanel(null)} />}
+      {panel === 'home' && <HomeExperiment onClose={() => setPanel(null)} />}
       {panel === 'settings' && <SettingsPanel onClose={() => setPanel(null)} onReset={() => setPanel('reset')} />}
       {panel === 'reset' && (
         <div className="screen dim" onClick={() => setPanel(null)}>
@@ -167,6 +154,7 @@ function SettingsPanel({ onClose, onReset }: { onClose: () => void; onReset: () 
     ['voice', '🗣️ ねこの こえ（よみあげ）', speech.available],
     ['sound', '🔔 こうかおん', true],
     ['music', '🎵 おんがく', true],
+    ['lite', '🪶 かるいモード（うごきが おそい・あつく なる とき）', true],
   ];
   return (
     <div className="screen dim" onClick={onClose}>
@@ -265,6 +253,7 @@ export function ChapterClear() {
 export function Ending() {
   const cheese = useProgress((s) => s.cheese);
   const [show, setShow] = useState(true);
+  const [home, setHome] = useState(false);
   useEffect(() => {
     playSfx('success');
     const t = setTimeout(() => playSfx('stamp'), 600);
@@ -278,6 +267,7 @@ export function Ending() {
         </button>
       </div>
     );
+  if (home) return <HomeExperiment onClose={() => setHome(false)} />;
   const kind = cheese?.type === 'soft' ? 'やわらかい' : cheese?.type === 'hard' ? 'かたい' : 'ほどよい かたさの';
   return (
     <div className="screen dim" data-testid="ending">
@@ -303,6 +293,9 @@ export function Ending() {
           </button>
         </div>
         <div className="row">
+          <button className="btn green" onClick={() => setHome(true)}>
+            🏠 おうちで やってみよう
+          </button>
           <button className="btn sub" onClick={() => setShow(false)}>
             🧀 ショップを みる
           </button>

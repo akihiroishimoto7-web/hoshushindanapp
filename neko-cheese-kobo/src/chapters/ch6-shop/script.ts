@@ -22,6 +22,6 @@ export const script: Step[] = [
     gesture: 'clap',
     event: 'cam:all',
   },
-  { t: 'say', text: 'こんど チーズを たべるとき、 きょうの ぼうけんを おもいだしてニャ！ また あそぼうね！', face: 'love', gesture: 'cheer', sfx: 'success' },
+  { t: 'say', text: '{よびかけ}こんど チーズを たべるとき、 きょうの ぼうけんを おもいだしてニャ！ また あそぼうね！', face: 'love', gesture: 'cheer', sfx: 'success' },
   { t: 'end' },
 ];

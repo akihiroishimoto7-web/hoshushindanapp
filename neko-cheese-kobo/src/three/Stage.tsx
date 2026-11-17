@@ -6,6 +6,8 @@ import { CameraRig } from './CameraRig';
 import { Particles } from './fx';
 import { TaskMarker } from './common';
 import { Realism, setShadows } from './realism';
+import { useProgress } from '../game/progress';
+import { showToast } from '../game/secrets';
 
 /**
  * 3D の舞台。スマホの発熱を おさえるため、
@@ -13,7 +15,10 @@ import { Realism, setShadows } from './realism';
  */
 export function Stage({ children, onLost }: { children: ReactNode; onLost?: () => void }) {
   const maxDpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2);
-  const [dpr, setDpr] = useState(Math.min(maxDpr, 1.75));
+  const lite = useProgress((p) => p.settings.lite);
+  const cap = lite ? Math.min(maxDpr, 1.25) : maxDpr;
+  const [dpr0, setDpr] = useState(Math.min(maxDpr, 1.75));
+  const dpr = Math.min(dpr0, cap);
   return (
     <Canvas
       className="stage"
@@ -38,6 +43,11 @@ export function Stage({ children, onLost }: { children: ReactNode; onLost?: () =
         onFallback={() => {
           setDpr(1);
           setShadows(false);
+          // ずっと 重い ときは 自動で かるいモードに して、おしらせ
+          if (!useProgress.getState().settings.lite) {
+            useProgress.getState().setSetting('lite', true);
+            showToast({ kind: 'info', icon: '🪶', title: 'かるいモードに したよ', text: 'せっていで もどせるよ' }, 3200);
+          }
         }}
       />
       <CameraRig />
